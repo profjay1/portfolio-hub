@@ -1,0 +1,17 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[java]": { "editor.formatOnSave": false },
+  "files.exclude": {
+    "**/node_modules": true,
+    "backend/target": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.angular": true,
+    "backend/target": true,
+    "frontend/src/app/api/generated": true
+  },
+  "files.eol": "\n"
+}
