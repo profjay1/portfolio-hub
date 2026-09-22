@@ -26,3 +26,5 @@ Filled in during Phase 2 (walking skeleton).
 
 ## License
 MIT. See [LICENSE](LICENSE).
+
+_Bootstrapped following the Phase 1 setup guide._
