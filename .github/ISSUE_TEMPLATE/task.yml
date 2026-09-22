@@ -1,0 +1,20 @@
+name: Technical task or spike
+description: Infrastructure, refactoring, tooling, documentation, or a time-boxed investigation
+labels: ["type:chore"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal and motivation
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+    validations:
+      required: true
+  - type: input
+    id: timebox
+    attributes:
+      label: Time-box (for spikes)

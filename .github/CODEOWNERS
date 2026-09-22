@@ -1,0 +1,7 @@
+# Replace profjay1. Ownership is explicit even for a solo project: it documents
+# which areas carry extra risk and is enforced automatically once collaborators exist.
+*                       @profjay1
+/.github/               @profjay1
+/infra/                 @profjay1
+/docs/adr/              @profjay1
+/backend/src/main/java/com/sahtechlabs/hub/identity/  @profjay1
