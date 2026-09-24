@@ -8,7 +8,7 @@ Start a vertical slice for: $ARGUMENTS
 
 1. If a number was given, run `gh issue view <n>` and read acceptance criteria. Otherwise ask the owner for the goal and acceptance criteria.
 2. Read the relevant CLAUDE.md files and explore only the code this slice touches.
-3. Check for the `hand-write` label. If present, plan ONLY: spec, edge cases, and the failing tests; the owner writes the implementation.
+3. Check for the `hand-write` label. If present, plan ONLY: spec, edge cases, and the failing tests; after approval, commit the failing tests on the issue branch and stop. The owner writes the implementation on that same branch.
 4. Produce a plan and STOP for approval. The plan must contain:
    - Branch name (`type/<issue#>-short-desc`) and proposed PR title (Conventional Commits).
    - Files to create or change, grouped by layer.
