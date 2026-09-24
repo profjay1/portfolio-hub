@@ -13,4 +13,4 @@ This is a personal portfolio project, but it is run like a professional one. The
 Tests green and meaningful, lint clean, input validated, errors handled, no secrets or personal data in code or logs, docs updated, ADR added if a decision changed.
 
 ## Local setup
-See `README.md` (filled in during Phase 2).
+See `README.md` (filled in during M1).

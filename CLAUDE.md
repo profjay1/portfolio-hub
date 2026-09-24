@@ -19,7 +19,7 @@ Optimise for correctness, clarity, testability, operability, and being explainab
 - `notes/`     PRIVATE study notes and interview notes. Git-ignored. Never commit.
 - `.claude/`   shared Claude Code settings, hooks, skills (slash commands), subagents
 
-## Commands (some appear only after Phase 2; see backend/ and frontend/ CLAUDE.md)
+## Commands (some appear only after M1, the walking skeleton; see backend/ and frontend/ CLAUDE.md)
 - Backend build + tests: `backend/mvnw -f backend/pom.xml verify`
 - Frontend: `npm --prefix frontend run lint | test:ci | build`
 - Full local stack: `docker compose -f infra/compose/compose.local.yml up -d`
