@@ -20,23 +20,39 @@ jobs:
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      ci: ${{ steps.filter.outputs.ci }}
+      backend-present: ${{ steps.manifests.outputs.backend-present }}
+      frontend-present: ${{ steps.manifests.outputs.frontend-present }}
     steps:
       - uses: actions/checkout@v4
+      # 'every' means a file counts only if it matches ALL patterns in a filter, which is what lets the
+      # '!**/*.md' exclusions work: a CLAUDE.md edit under backend/ or frontend/ does not start a build.
+      # The workflow file therefore needs its own filter rather than sharing a list with the negations.
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          predicate-quantifier: 'every'
           filters: |
             backend:
               - 'backend/**'
-              - '.github/workflows/ci.yml'
+              - '!backend/**/*.md'
             frontend:
               - 'frontend/**'
+              - '!frontend/**/*.md'
+            ci:
               - '.github/workflows/ci.yml'
+      # Until M1 adds the code, backend/ and frontend/ hold only docs, so a build would fail on a missing
+      # wrapper or package.json. Once M1 lands, drop this guard so a deleted manifest fails loudly.
+      - name: Detect build manifests
+        id: manifests
+        run: |
+          echo "backend-present=$([[ -f backend/mvnw ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "frontend-present=$([[ -f frontend/package.json ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   backend:
     name: Backend (build, test)
     needs: changes
-    if: needs.changes.outputs.backend == 'true'
+    if: needs.changes.outputs.backend-present == 'true' && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.ci == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -56,7 +72,7 @@ jobs:
   frontend:
     name: Frontend (lint, test, build)
     needs: changes
-    if: needs.changes.outputs.frontend == 'true'
+    if: needs.changes.outputs.frontend-present == 'true' && (needs.changes.outputs.frontend == 'true' || needs.changes.outputs.ci == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:

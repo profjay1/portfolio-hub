@@ -18,8 +18,10 @@ Optimise for correctness, clarity, testability, operability, and being explainab
 - `docs/`      ADRs (`docs/adr`), architecture (`docs/architecture`), runbooks (`docs/runbooks`)
 - `notes/`     PRIVATE study notes and interview notes. Git-ignored. Never commit.
 - `.claude/`   shared Claude Code settings, hooks, skills (slash commands), subagents
+- `.github/`   CI workflows, issue and PR templates, CODEOWNERS, Dependabot config, rulesets
+- `scripts/`   one-off repo bootstrap scripts (`setup-github.sh`, `seed-backlog.sh`)
 
-## Commands (some appear only after Phase 2; see backend/ and frontend/ CLAUDE.md)
+## Commands (some appear only after M1, the walking skeleton; see backend/ and frontend/ CLAUDE.md)
 - Backend build + tests: `backend/mvnw -f backend/pom.xml verify`
 - Frontend: `npm --prefix frontend run lint | test:ci | build`
 - Full local stack: `docker compose -f infra/compose/compose.local.yml up -d`
@@ -36,6 +38,7 @@ Optimise for correctness, clarity, testability, operability, and being explainab
 
 ## Learning mode (the owner must be able to defend every line in an interview)
 - Issues labelled `hand-write` are implemented by the OWNER. For those, provide only: a spec, edge cases, failing tests, and review. Do not write the implementation unless the owner explicitly asks.
+  The failing tests are committed on the issue branch (`test(<scope>): add failing tests for ...`); the owner then implements on that same branch, so tests and implementation ship in one PR.
 - After each merged slice, offer `/teach-back` (quiz) and `/interview-notes` (private notes). Prefer explaining trade-offs over listing features.
 - When a design choice has a real alternative, say so and offer `/adr`.
 

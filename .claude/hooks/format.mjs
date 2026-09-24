@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // PostToolUse hook (Edit|Write|MultiEdit).
 // Formats frontend files with Prettier when it is installed. Never blocks and never fails the session.
-// Backend formatting is handled by Spotless in the Maven build (added in Phase 2).
+// Backend formatting is handled by Spotless in the Maven build (added in M1).
 import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';

@@ -22,7 +22,7 @@
 - [Working agreement](CONTRIBUTING.md)
 
 ## Running locally
-Filled in during Phase 2 (walking skeleton).
+Filled in during M1 (walking skeleton).
 
 ## License
 MIT. See [LICENSE](LICENSE).

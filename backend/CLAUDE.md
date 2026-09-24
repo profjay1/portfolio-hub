@@ -19,10 +19,10 @@ Inside each module:
 - `ApplicationModules.of(HubApplication.class).verify()` must pass; it runs in the test suite. Never weaken it to make a build pass.
 
 ## Conventions
-- **API:** `/api/v1/...`. Decide native Boot 4 API versioning vs path prefix in Phase 2 and record it in an ADR.
+- **API:** `/api/v1/...`. Decide native Boot 4 API versioning vs path prefix in M1 and record it in an ADR.
 - **Validation:** Bean Validation on request DTOs; domain invariants enforced in the domain, not only at the edge.
 - **Errors:** one `@RestControllerAdvice` returning `ProblemDetail` with a stable `code` property; never leak stack traces or internals.
-- **Persistence:** Spring Data JDBC or JPA is decided by ADR in Phase 2. Flyway migrations `V<n>__<snake_case>.sql`. NEVER edit an applied migration; add a new one. Migrations must be backwards compatible with the previous release (expand/contract).
+- **Persistence:** Spring Data JDBC or JPA is decided by ADR in M1. Flyway migrations `V<n>__<snake_case>.sql`. NEVER edit an applied migration; add a new one. Migrations must be backwards compatible with the previous release (expand/contract).
 - **Config:** `@ConfigurationProperties` records with validation, bound from environment variables prefixed `HUB_`. Profiles: `local`, `test`, `prod`. No secrets in `application*.yml`.
 - **Logging:** structured JSON in `prod` via Boot structured logging; correlation id in MDC; never log passwords, tokens, or message bodies; log ids not personal data.
 - **Security:** Spring Security 7, deny by default, method security for admin operations, BCrypt (or delegating encoder), login throttling, security headers, CORS allow-list from config.

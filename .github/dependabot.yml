@@ -9,8 +9,8 @@ updates:
     groups:
       actions:
         patterns: ["*"]
-  # Enable each block below in the phase that creates the manifest (an entry pointing at a
-  # missing directory produces Dependabot errors). Phase 2 adds backend, frontend, and Docker.
+  # Enable each block below in the milestone that creates the manifest (an entry pointing at a
+  # missing directory produces Dependabot errors). M1 adds backend, frontend, and Docker.
   #
   # - package-ecosystem: "maven"
   #   directory: "/backend"
