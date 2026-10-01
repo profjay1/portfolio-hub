@@ -21,7 +21,6 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
       ci: ${{ steps.filter.outputs.ci }}
-      backend-present: ${{ steps.manifests.outputs.backend-present }}
       frontend-present: ${{ steps.manifests.outputs.frontend-present }}
     steps:
       - uses: actions/checkout@v4
@@ -41,18 +40,17 @@ jobs:
               - '!frontend/**/*.md'
             ci:
               - '.github/workflows/ci.yml'
-      # Until M1 adds the code, backend/ and frontend/ hold only docs, so a build would fail on a missing
-      # wrapper or package.json. Once M1 lands, drop this guard so a deleted manifest fails loudly.
+      # Until M1 adds the frontend code, frontend/ holds only docs, so a build would fail on a missing
+      # package.json. Once it lands, drop this guard so a deleted manifest fails loudly (as backend/ now does).
       - name: Detect build manifests
         id: manifests
         run: |
-          echo "backend-present=$([[ -f backend/mvnw ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           echo "frontend-present=$([[ -f frontend/package.json ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   backend:
     name: Backend (build, test)
     needs: changes
-    if: needs.changes.outputs.backend-present == 'true' && (needs.changes.outputs.backend == 'true' || needs.changes.outputs.ci == 'true')
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.ci == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
