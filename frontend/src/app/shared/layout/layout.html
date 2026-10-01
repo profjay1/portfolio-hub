@@ -1,0 +1,37 @@
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" routerLink="/">
+      <span class="brand-mark" aria-hidden="true">SO</span>
+      <span class="brand-name">Saheed Omotola</span>
+    </a>
+
+    <nav class="site-nav" aria-label="Primary">
+      <ul>
+        @for (link of links; track link.path) {
+          <li>
+            <a
+              [routerLink]="link.path"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: link.path === '/' }"
+              ariaCurrentWhenActive="page"
+              >{{ link.label }}</a
+            >
+          </li>
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="container site-main" tabindex="-1">
+  <router-outlet />
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p>© {{ year }} Saheed Omotola</p>
+    <p class="muted">Built with Angular and Spring Boot. Source on GitHub.</p>
+  </div>
+</footer>

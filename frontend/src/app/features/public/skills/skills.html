@@ -1,0 +1,22 @@
+<section class="page-intro">
+  <p class="eyebrow">Skills</p>
+  <h1>Tools I reach for, and why.</h1>
+  <p class="lede">
+    A working toolkit across the stack. I pick tools for how well they fit the problem and how easy
+    they are to maintain, not for novelty.
+  </p>
+</section>
+
+<div class="card-grid">
+  @for (group of groups; track group.name) {
+    <section class="card" [attr.aria-labelledby]="'skills-' + $index">
+      <h2 [id]="'skills-' + $index">{{ group.name }}</h2>
+      <p>{{ group.summary }}</p>
+      <ul class="tags">
+        @for (skill of group.skills; track skill) {
+          <li>{{ skill }}</li>
+        }
+      </ul>
+    </section>
+  }
+</div>

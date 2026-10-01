@@ -1,0 +1,40 @@
+<section class="hero">
+  <p class="eyebrow">Software engineer</p>
+  <h1>I build reliable web systems, from database to browser.</h1>
+  <p class="lede">
+    I design and ship full-stack applications with a focus on clean architecture, thorough testing,
+    and operations that stay calm under load. This site is itself one of those systems: open source,
+    tested, and deployed through the same pipeline I would use at work.
+  </p>
+  <div class="actions">
+    <a class="button button-primary" routerLink="/projects">View projects</a>
+    <a class="button" routerLink="/contact">Get in touch</a>
+  </div>
+
+  <p class="api-status" role="status">
+    @if (ping.isLoading()) {
+      <span class="dot dot-pending" aria-hidden="true"></span>
+      <span>Checking backend…</span>
+    } @else if (ping.error()) {
+      <span class="dot dot-down" aria-hidden="true"></span>
+      <span>Backend unavailable right now.</span>
+    } @else if (ping.hasValue()) {
+      <span class="dot dot-up" aria-hidden="true"></span>
+      <span
+        >Backend online · version <code>{{ ping.value().version }}</code></span
+      >
+    }
+  </p>
+</section>
+
+<section class="focus" aria-labelledby="focus-heading">
+  <h2 id="focus-heading">What I focus on</h2>
+  <ul class="card-grid">
+    @for (area of focusAreas; track area.title) {
+      <li class="card">
+        <h3>{{ area.title }}</h3>
+        <p>{{ area.body }}</p>
+      </li>
+    }
+  </ul>
+</section>
