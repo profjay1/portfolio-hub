@@ -57,7 +57,7 @@ class ProblemDetailsTests {
 
     @Test
     void unknownPathsReturnANotFoundProblem() {
-        assertThat(mvc.get().uri("/no-such-path"))
+        assertThat(mvc.get().uri("/scaffolding/no-such-path"))
                 .hasStatus(HttpStatus.NOT_FOUND)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .bodyJson()
@@ -101,7 +101,7 @@ class ProblemDetailsTests {
     @Test
     void replacesCallerCorrelationIdsThatCouldForgeLogLines() {
         for (String unsafe : List.of("abc\r\nFAKE LOG LINE", "short", "x".repeat(65), "<script>alert(1)</script>")) {
-            var response = mvc.get().uri("/no-such-path").header(CorrelationIdFilter.HEADER, unsafe).exchange();
+            var response = mvc.get().uri("/scaffolding/no-such-path").header(CorrelationIdFilter.HEADER, unsafe).exchange();
 
             assertThat(response.getResponse().getHeader(CorrelationIdFilter.HEADER))
                     .as("correlation id returned when the caller sent %s", unsafe)

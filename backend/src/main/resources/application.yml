@@ -1,6 +1,10 @@
 spring:
   application:
     name: hub
+  autoconfigure:
+    # Boot's fallback in-memory user logs a generated password at startup. Nothing can use it (no Basic or form
+    # login), but a credential in the logs is still a leak. Users come from the identity module instead (#24).
+    exclude: org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
 
 # Only health and info are reachable over HTTP; every other actuator endpoint stays unexposed (404).
 management:

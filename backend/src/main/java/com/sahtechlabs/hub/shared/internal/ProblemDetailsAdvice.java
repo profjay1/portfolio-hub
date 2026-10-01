@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -41,6 +43,22 @@ class ProblemDetailsAdvice extends ResponseEntityExceptionHandler {
                 .sorted(Comparator.comparing(FieldError::field))
                 .toList());
         return handleExceptionInternal(ex, problem, headers, status, request);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    ResponseEntity<Object> handleUnauthenticated(AuthenticationException ex, WebRequest request) {
+        // Deliberately generic: never say whether the account exists or which credential was wrong.
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Authentication is required.");
+        problem.setProperty("code", "unauthorized");
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    ResponseEntity<Object> handleForbidden(AccessDeniedException ex, WebRequest request) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.FORBIDDEN, "You do not have permission to perform this action.");
+        problem.setProperty("code", "forbidden");
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
     }
 
     @ExceptionHandler(Exception.class)
