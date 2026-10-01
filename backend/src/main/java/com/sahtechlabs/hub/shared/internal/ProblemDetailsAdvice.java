@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.csrf.CsrfException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -43,6 +45,24 @@ class ProblemDetailsAdvice extends ResponseEntityExceptionHandler {
                 .sorted(Comparator.comparing(FieldError::field))
                 .toList());
         return handleExceptionInternal(ex, problem, headers, status, request);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    ResponseEntity<Object> handleBadCredentials(BadCredentialsException ex, WebRequest request) {
+        // One message for "no such account" and "wrong password", so the response cannot be used to find accounts.
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.UNAUTHORIZED, "The email or password is incorrect.");
+        problem.setProperty("code", "invalid-credentials");
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ExceptionHandler(CsrfException.class)
+    ResponseEntity<Object> handleCsrf(CsrfException ex, WebRequest request) {
+        // Distinct code so the frontend can tell "fetch a fresh token and retry" apart from a real permission problem.
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.FORBIDDEN, "The request is missing a valid CSRF token.");
+        problem.setProperty("code", "invalid-csrf-token");
+        return handleExceptionInternal(ex, problem, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
     }
 
     @ExceptionHandler(AuthenticationException.class)

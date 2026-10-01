@@ -1,10 +1,6 @@
 spring:
   application:
     name: hub
-  autoconfigure:
-    # Boot's fallback in-memory user logs a generated password at startup. Nothing can use it (no Basic or form
-    # login), but a credential in the logs is still a leak. Users come from the identity module instead (#24).
-    exclude: org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
 
 # Only health and info are reachable over HTTP; every other actuator endpoint stays unexposed (404).
 management:
@@ -22,6 +18,11 @@ management:
         # Liveness deliberately does not: a database outage should not make the platform restart the app.
         readiness:
           include: readinessState, db
+
+hub:
+  jwt:
+    # The signing secret has no default: it comes only from HUB_JWT_SECRET.
+    ttl: 1h
 
 logging:
   pattern:

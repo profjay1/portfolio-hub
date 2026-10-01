@@ -1,6 +1,7 @@
 package com.sahtechlabs.hub.identity.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static com.sahtechlabs.hub.identity.internal.BrowserCsrf.csrfToken;
 
 import com.sahtechlabs.hub.TestcontainersConfiguration;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,6 @@ import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -81,14 +81,16 @@ class SecurityConfigurationTests {
 
     @Test
     void publicReadsDoNotOpenWritesOnTheSamePath() {
-        assertThat(mvc.post().uri("/api/v1/ping")).hasStatus(HttpStatus.UNAUTHORIZED);
+        // With a valid CSRF token, so the request reaches the authorization rules rather than the CSRF check.
+        assertThat(mvc.post().uri("/api/v1/ping").with(csrfToken())).hasStatus(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
     void responsesCreateNoSessionAndCarrySecurityHeaders() {
         var response = mvc.get().uri("/api/v1/ping").exchange();
 
-        assertThat(response.getResponse().getHeader(HttpHeaders.SET_COOKIE)).isNull();
+        // The only cookie an anonymous request gets is the CSRF token the SPA must echo back.
+        assertThat(response.getResponse().getCookies()).extracting("name").containsExactly("XSRF-TOKEN");
         assertThat(response.getRequest().getSession(false)).isNull();
         assertThat(response).hasHeader("X-Content-Type-Options", "nosniff");
     }
