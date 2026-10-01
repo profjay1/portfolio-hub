@@ -8,6 +8,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -17,6 +19,15 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
  */
 @Configuration(proxyBeanMethods = false)
 class SecurityConfiguration {
+
+    /**
+     * BCrypt today. Hashes carry an "{id}" prefix, so a stronger algorithm can be adopted later while existing hashes
+     * keep verifying.
+     */
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
 
     @Bean
     SecurityFilterChain apiSecurity(

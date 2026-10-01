@@ -10,6 +10,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
@@ -55,6 +56,7 @@ class ReadinessTests {
     }
 
     @TestConfiguration(proxyBeanMethods = false)
+    @PropertySource("classpath:integration-test.properties")
     static class DisposableDatabase {
 
         @Bean
