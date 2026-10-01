@@ -1,0 +1,11 @@
+# Generated or third-party output; formatting it would only create noise.
+dist/
+coverage/
+.angular/
+node_modules/
+playwright-report/
+test-results/
+package-lock.json
+src/app/api/generated/
+# Docs are hand-wrapped prose; reflowing them adds churn without improving anything.
+*.md
