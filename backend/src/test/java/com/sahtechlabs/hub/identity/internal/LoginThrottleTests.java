@@ -1,6 +1,6 @@
 package com.sahtechlabs.hub.identity.internal;
 
-import static com.sahtechlabs.hub.identity.internal.BrowserCsrf.csrfToken;
+import static com.sahtechlabs.hub.BrowserCsrf.csrfToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sahtechlabs.hub.MutableClock;

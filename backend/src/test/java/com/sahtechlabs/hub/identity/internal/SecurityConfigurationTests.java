@@ -1,7 +1,7 @@
 package com.sahtechlabs.hub.identity.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static com.sahtechlabs.hub.identity.internal.BrowserCsrf.csrfToken;
+import static com.sahtechlabs.hub.BrowserCsrf.csrfToken;
 
 import com.sahtechlabs.hub.TestcontainersConfiguration;
 import org.junit.jupiter.api.Test;
