@@ -2,6 +2,23 @@ spring:
   application:
     name: hub
 
+# Only health and info are reachable over HTTP; every other actuator endpoint stays unexposed (404).
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      # /actuator/health/liveness and /readiness exist outside Kubernetes too, for Compose and Caddy health gates.
+      probes:
+        enabled: true
+      group:
+        # Readiness includes the database so traffic stops while PostgreSQL is unreachable.
+        # Liveness deliberately does not: a database outage should not make the platform restart the app.
+        readiness:
+          include: readinessState, db
+
 ---
 # Developer machine against a locally running PostgreSQL (see .env.example).
 # No fallback values: a missing variable fails startup instead of silently connecting somewhere else.

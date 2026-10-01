@@ -28,6 +28,10 @@
 			<groupId>org.springframework.modulith</groupId>
 			<artifactId>spring-modulith-starter-core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
 		<!-- Spring Data JDBC rather than JPA: see docs/adr/0005. -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -87,6 +91,24 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<!-- Writes META-INF/build-info.properties so /actuator/info reports the pom version. -->
+					<execution>
+						<goals>
+							<goal>build-info</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Version and execution come from the Boot parent; writes git.properties for /actuator/info. -->
+			<plugin>
+				<groupId>io.github.git-commit-id</groupId>
+				<artifactId>git-commit-id-maven-plugin</artifactId>
+				<configuration>
+					<!-- Container builds may not copy .git; build without commit info rather than fail. -->
+					<failOnNoGitDirectory>false</failOnNoGitDirectory>
+					<verbose>false</verbose>
+				</configuration>
 			</plugin>
 			<!-- Fail fast with a clear message instead of an obscure compiler error on an older JDK. -->
 			<plugin>
