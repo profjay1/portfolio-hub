@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.endpoint.web.PathMappedEndpoints;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
@@ -19,6 +20,9 @@ class ActuatorExposureTests {
 
     @Autowired
     private MockMvcTester mvc;
+
+    @Autowired
+    private PathMappedEndpoints exposedEndpoints;
 
     @ParameterizedTest
     @ValueSource(strings = {"/actuator/health", "/actuator/health/liveness", "/actuator/health/readiness"})
@@ -47,13 +51,11 @@ class ActuatorExposureTests {
     }
 
     @Test
-    void discoveryListsOnlyHealthAndInfo() {
-        assertThat(mvc.get().uri("/actuator"))
-                .hasStatusOk()
-                .bodyJson()
-                .extractingPath("$._links")
-                .asMap()
-                .containsOnlyKeys("self", "health", "health-path", "info");
+    void onlyHealthAndInfoAreExposedOverHttp() {
+        // Checked on the actuator's own registry: with deny-by-default security an unexposed endpoint and a
+        // forbidden one both answer 401, so HTTP status alone cannot prove exposure stayed narrow.
+        assertThat(exposedEndpoints.getAllPaths())
+                .containsExactlyInAnyOrder("/actuator/health", "/actuator/info");
     }
 
     @ParameterizedTest
@@ -63,7 +65,7 @@ class ActuatorExposureTests {
         "/actuator/conditions", "/actuator/scheduledtasks", "/actuator/flyway", "/actuator/sbom",
         "/actuator/shutdown"
     })
-    void everyOtherEndpointIsNotFoundForAnonymousCallers(String path) {
-        assertThat(mvc.get().uri(path)).hasStatus(HttpStatus.NOT_FOUND);
+    void everyOtherEndpointIsRejectedForAnonymousCallers(String path) {
+        assertThat(mvc.get().uri(path)).hasStatus(HttpStatus.UNAUTHORIZED);
     }
 }
