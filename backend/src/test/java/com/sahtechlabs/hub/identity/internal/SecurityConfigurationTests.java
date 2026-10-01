@@ -22,6 +22,9 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 @Import(TestcontainersConfiguration.class)
 class SecurityConfigurationTests {
 
+    /** Covered by the admin rule but served by no controller, so these tests exercise the rule, not a feature. */
+    private static final String ADMIN_PATH_WITHOUT_HANDLER = "/api/v1/admin/no-such-endpoint";
+
     @Autowired
     private MockMvcTester mvc;
 
@@ -46,7 +49,7 @@ class SecurityConfigurationTests {
 
     @Test
     void anonymousIsRejectedFromAdminEndpoints() {
-        var response = mvc.get().uri("/api/v1/admin/projects");
+        var response = mvc.get().uri(ADMIN_PATH_WITHOUT_HANDLER);
 
         assertThat(response)
                 .hasStatus(HttpStatus.UNAUTHORIZED)
@@ -58,7 +61,7 @@ class SecurityConfigurationTests {
     @Test
     @WithMockUser(roles = "VISITOR")
     void wrongRoleIsRejectedFromAdminEndpoints() {
-        assertThat(mvc.get().uri("/api/v1/admin/projects"))
+        assertThat(mvc.get().uri(ADMIN_PATH_WITHOUT_HANDLER))
                 .hasStatus(HttpStatus.FORBIDDEN)
                 .hasContentType(MediaType.APPLICATION_PROBLEM_JSON)
                 .bodyJson()
@@ -69,8 +72,8 @@ class SecurityConfigurationTests {
     @Test
     @WithMockUser(roles = "ADMIN")
     void adminPassesTheAdminRule() {
-        // No admin endpoint exists yet: reaching the dispatcher (404) proves authorization let the request through.
-        assertThat(mvc.get().uri("/api/v1/admin/projects")).hasStatus(HttpStatus.NOT_FOUND);
+        // Reaching the dispatcher (404 for a path with no handler) proves authorization let the request through.
+        assertThat(mvc.get().uri(ADMIN_PATH_WITHOUT_HANDLER)).hasStatus(HttpStatus.NOT_FOUND);
     }
 
     @Test
