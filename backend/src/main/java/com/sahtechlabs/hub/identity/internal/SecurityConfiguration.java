@@ -5,12 +5,18 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
@@ -29,14 +35,31 @@ class SecurityConfiguration {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    /**
+     * Used only by login. DaoAuthenticationProvider hashes a dummy password when the email is unknown, so response
+     * time does not reveal which accounts exist, and it reports both failures as BadCredentialsException.
+     */
+    @Bean
+    AuthenticationManager authenticationManager(UserDetailsService accounts, PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(accounts);
+        provider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(provider);
+    }
+
     @Bean
     SecurityFilterChain apiSecurity(
-            HttpSecurity http, @Qualifier("handlerExceptionResolver") HandlerExceptionResolver exceptionResolver) {
+            HttpSecurity http,
+            TokenService tokens,
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver exceptionResolver) {
         http
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // No ambient credentials (cookies, sessions) exist yet, so there is nothing for CSRF to protect.
-                // #25 revisits this when the auth cookie arrives (SameSite=Strict, see its ADR).
-                .csrf(AbstractHttpConfigurer::disable)
+                // The session cookie is an ambient credential, so unsafe requests need a CSRF token as well
+                // (double-submit: XSRF-TOKEN cookie echoed in the X-XSRF-TOKEN header, which Angular does natively).
+                // SameSite=Strict alone is not enough: it does not stop same-site (sibling subdomain) attackers.
+                // See docs/adr/0006.
+                .csrf(csrf -> csrf.spa())
+                .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class)
+                .addFilterBefore(new JwtCookieAuthenticationFilter(tokens), AnonymousAuthenticationFilter.class)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
@@ -54,6 +77,9 @@ class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/v1/ping").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**", "/actuator/info")
                                 .permitAll()
+                        // Logout stays public so an expired session can still clear its cookie.
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/logout").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/me").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().denyAll());
         return http.build();

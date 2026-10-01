@@ -40,6 +40,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+		<!-- Spring Security's JWT support (Nimbus): sign and verify tokens; see docs/adr/0006. -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-jose</artifactId>
+		</dependency>
 		<!-- Spring Data JDBC rather than JPA: see docs/adr/0005. -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
