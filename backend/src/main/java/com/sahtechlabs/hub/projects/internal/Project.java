@@ -56,6 +56,14 @@ record Project(
         return new Project(id, title, description, url, imageUrl, displayOrder, published, createdAt);
     }
 
+    /** The id of a project that has been saved; calling this on an unsaved project is a programming error. */
+    long savedId() {
+        if (id == null) {
+            throw new IllegalStateException("project has not been saved yet");
+        }
+        return id;
+    }
+
     private static void requireHttpUrl(String field, @Nullable String value) {
         if (value != null && !HttpUrls.isValid(value)) {
             throw new IllegalArgumentException(field + " must be an absolute http(s) URL");

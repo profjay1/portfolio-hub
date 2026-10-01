@@ -2,6 +2,7 @@ package com.sahtechlabs.hub.projects.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ class ProjectTests {
 
         assertThat(project.id()).isNull();
         assertThat(project.createdAt()).isEqualTo(CREATED);
+        assertThatIllegalStateException().isThrownBy(project::savedId);
     }
 
     @ParameterizedTest
