@@ -31,3 +31,10 @@ src/app
 
 ## Commands
 - `npm --prefix frontend ci` / `start` / `run lint` / `run test:ci` / `run build`
+- `npm --prefix frontend run e2e` (first time: `npx --prefix frontend playwright install chromium`). Starts its own dev server and stubs the API.
+- `npm --prefix frontend run format` rewrites files with Prettier; `lint` only checks.
+
+## Running locally
+Two terminals: the backend on :8080 (see backend/CLAUDE.md), then `npm --prefix frontend start` on :4200.
+`proxy.conf.json` forwards `/api/**` to `http://localhost:8080`, so the app always calls relative URLs and stays
+same-origin (no CORS, and the XSRF cookie flow works). Change the target there if the backend runs elsewhere.
