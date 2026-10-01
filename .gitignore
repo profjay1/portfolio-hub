@@ -22,6 +22,8 @@ CLAUDE.local.md
 
 # --- Java / Maven ---
 backend/target/
+# Spring Modulith's Javadoc processor writes here when Maven runs from the repo root (`-f backend/pom.xml`).
+build/generated-spring-modulith/
 *.class
 *.log
 hs_err_pid*
