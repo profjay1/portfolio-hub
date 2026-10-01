@@ -1,4 +1,4 @@
-package com.sahtechlabs.hub.identity.internal;
+package com.sahtechlabs.hub;
 
 import jakarta.servlet.http.Cookie;
 import java.util.ArrayList;
@@ -14,11 +14,11 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
  * shared application context. That swap leaked into later tests and stopped the real XSRF-TOKEN cookie from being
  * issued, making results depend on test order. This keeps the production CSRF check untouched.
  */
-final class BrowserCsrf {
+public final class BrowserCsrf {
 
     private BrowserCsrf() {}
 
-    static RequestPostProcessor csrfToken() {
+    public static RequestPostProcessor csrfToken() {
         return request -> {
             String token = UUID.randomUUID().toString();
             List<Cookie> cookies = new ArrayList<>(

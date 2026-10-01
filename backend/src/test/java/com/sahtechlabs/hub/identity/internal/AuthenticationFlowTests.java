@@ -1,7 +1,7 @@
 package com.sahtechlabs.hub.identity.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static com.sahtechlabs.hub.identity.internal.BrowserCsrf.csrfToken;
+import static com.sahtechlabs.hub.BrowserCsrf.csrfToken;
 
 import com.sahtechlabs.hub.TestcontainersConfiguration;
 import jakarta.servlet.http.Cookie;
@@ -168,8 +168,8 @@ class AuthenticationFlowTests {
     void aValidAdminCookiePassesTheAdminRule() {
         Cookie session = sessionCookie(sessionTokenFrom(login(admin.email(), admin.password())));
 
-        // No admin endpoint exists yet: 404 means authorization let the request through to the dispatcher.
-        assertThat(mvc.get().uri("/api/v1/admin/projects").cookie(session)).hasStatus(HttpStatus.NOT_FOUND);
+        // A real login cookie, not a mock user, reaching a real admin endpoint.
+        assertThat(mvc.get().uri("/api/v1/admin/projects").cookie(session)).hasStatusOk();
         assertThat(mvc.get().uri("/api/v1/admin/projects")).hasStatus(HttpStatus.UNAUTHORIZED);
     }
 
