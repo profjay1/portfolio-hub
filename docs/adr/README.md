@@ -10,5 +10,6 @@ if a decision changes, add a new ADR that supersedes it and mark the old one `Su
 | [0003](0003-trunk-based-flow-conventional-commits.md) | Trunk-based flow, Conventional Commits, squash merges | Accepted |
 | [0004](0004-hosting-hub-on-vps-others-on-aws.md) | Hub on a VPS, other projects on AWS | Accepted |
 | [0005](0005-spring-data-jdbc-for-persistence.md) | Use Spring Data JDBC for persistence | Accepted |
+| [0006](0006-jwt-in-httponly-cookie-with-csrf-tokens.md) | Carry the session JWT in an HttpOnly cookie, with CSRF tokens | Accepted |
 
 Create new ones with the `/adr` Claude Code skill or by copying [0000-template.md](0000-template.md).
