@@ -2,6 +2,11 @@ spring:
   application:
     name: hub
 
+logging:
+  pattern:
+    # Plain-text logs (local) show the request's correlation id; structured formats include MDC entries already.
+    correlation: "[%X{correlationId:-}] "
+
 ---
 # Developer machine against a locally running PostgreSQL (see .env.example).
 # No fallback values: a missing variable fails startup instead of silently connecting somewhere else.
@@ -13,3 +18,14 @@ spring:
     url: ${HUB_DB_URL}
     username: ${HUB_DB_USER}
     password: ${HUB_DB_PASSWORD}
+
+---
+# Production: one JSON object per line (Elastic Common Schema) so logs can be shipped and queried by field.
+spring:
+  config:
+    activate:
+      on-profile: prod
+logging:
+  structured:
+    format:
+      console: ecs
