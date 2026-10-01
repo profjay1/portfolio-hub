@@ -1,0 +1,2 @@
+-- Baseline: marks the start of the Hub's migration history. Intentionally contains no statements.
+-- Each module adds its own tables in the slice that first needs them (V2 onwards).

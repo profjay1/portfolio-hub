@@ -1,3 +1,15 @@
 spring:
   application:
     name: hub
+
+---
+# Developer machine against a locally running PostgreSQL (see .env.example).
+# No fallback values: a missing variable fails startup instead of silently connecting somewhere else.
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: ${HUB_DB_URL}
+    username: ${HUB_DB_USER}
+    password: ${HUB_DB_PASSWORD}
