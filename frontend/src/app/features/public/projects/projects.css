@@ -1,0 +1,33 @@
+.state:empty {
+  display: none;
+}
+
+.state {
+  color: var(--color-muted);
+}
+
+.project {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  block-size: 100%;
+}
+
+.project img {
+  inline-size: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-hover);
+}
+
+.project h2 {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+/* Pushes the link to the bottom so cards in a row line up. */
+.project a {
+  margin-block-start: auto;
+  font-weight: 500;
+}

@@ -1,0 +1,133 @@
+<form class="project-form" novalidate (submit)="save($event)">
+  <h2 id="project-form-heading" tabindex="-1">
+    @if (project(); as editing) {
+      Edit {{ editing.title }}
+    } @else {
+      New project
+    }
+  </h2>
+
+  @if (form().errors().length > 0) {
+    <div class="notice notice-error" role="alert">
+      @for (error of form().errors(); track $index) {
+        <p>{{ error.message }}</p>
+      }
+    </div>
+  }
+
+  <div class="field">
+    <label for="project-title">Title</label>
+    <input
+      id="project-title"
+      type="text"
+      autocomplete="off"
+      [formField]="form.title"
+      [attr.aria-invalid]="showErrors(form.title) ? 'true' : null"
+      [attr.aria-describedby]="showErrors(form.title) ? 'project-title-error' : null"
+    />
+    @if (showErrors(form.title)) {
+      <p class="field-error" id="project-title-error">
+        @for (error of form.title().errors(); track $index) {
+          {{ error.message }}
+        }
+      </p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="project-description">Description</label>
+    <textarea
+      id="project-description"
+      rows="4"
+      [formField]="form.description"
+      [attr.aria-invalid]="showErrors(form.description) ? 'true' : null"
+      [attr.aria-describedby]="showErrors(form.description) ? 'project-description-error' : null"
+    ></textarea>
+    @if (showErrors(form.description)) {
+      <p class="field-error" id="project-description-error">
+        @for (error of form.description().errors(); track $index) {
+          {{ error.message }}
+        }
+      </p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="project-url">Project link</label>
+    <input
+      id="project-url"
+      type="url"
+      inputmode="url"
+      placeholder="https://"
+      [formField]="form.url"
+      [attr.aria-invalid]="showErrors(form.url) ? 'true' : null"
+      [attr.aria-describedby]="showErrors(form.url) ? 'project-url-error' : null"
+    />
+    @if (showErrors(form.url)) {
+      <p class="field-error" id="project-url-error">
+        @for (error of form.url().errors(); track $index) {
+          {{ error.message }}
+        }
+      </p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="project-image-url">Image link</label>
+    <input
+      id="project-image-url"
+      type="url"
+      inputmode="url"
+      placeholder="https://"
+      [formField]="form.imageUrl"
+      [attr.aria-invalid]="showErrors(form.imageUrl) ? 'true' : null"
+      [attr.aria-describedby]="showErrors(form.imageUrl) ? 'project-image-url-error' : null"
+    />
+    @if (showErrors(form.imageUrl)) {
+      <p class="field-error" id="project-image-url-error">
+        @for (error of form.imageUrl().errors(); track $index) {
+          {{ error.message }}
+        }
+      </p>
+    }
+  </div>
+
+  <div class="field field-narrow">
+    <label for="project-display-order">Display order</label>
+    <input
+      id="project-display-order"
+      type="number"
+      step="1"
+      [formField]="form.displayOrder"
+      [attr.aria-invalid]="showErrors(form.displayOrder) ? 'true' : null"
+      [attr.aria-describedby]="showErrors(form.displayOrder) ? 'project-display-order-error' : null"
+    />
+    @if (showErrors(form.displayOrder)) {
+      <p class="field-error" id="project-display-order-error">
+        @for (error of form.displayOrder().errors(); track $index) {
+          {{ error.message }}
+        }
+      </p>
+    }
+  </div>
+
+  <div class="field field-checkbox">
+    <input id="project-published" type="checkbox" [formField]="form.published" />
+    <label for="project-published">Published</label>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="button button-primary" [disabled]="form().submitting()">
+      @if (form().submitting()) {
+        Saving…
+      } @else if (project()) {
+        Save changes
+      } @else {
+        Create project
+      }
+    </button>
+    <button type="button" class="button" [disabled]="form().submitting()" (click)="cancel()">
+      Cancel
+    </button>
+  </div>
+</form>

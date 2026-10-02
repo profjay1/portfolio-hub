@@ -1,0 +1,103 @@
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-block-end: var(--space-4);
+}
+
+.page-head h1 {
+  margin: 0;
+}
+
+.state {
+  color: var(--color-muted);
+}
+
+.state:empty {
+  display: none;
+}
+
+.notice {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid currentColor;
+  border-radius: var(--radius-sm);
+}
+
+.notice-error {
+  color: var(--color-danger);
+}
+
+/* Narrow screens scroll the table sideways rather than squashing columns. */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+th,
+td {
+  padding: var(--space-2) var(--space-3);
+  border-block-end: 1px solid var(--color-border);
+  text-align: start;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+thead th {
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+tbody tr:last-child > * {
+  border-block-end: 0;
+}
+
+tbody th {
+  font-weight: 600;
+  white-space: normal;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}
+
+.badge-live {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.button-danger {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-panel {
+  margin-block-end: var(--space-5);
+}

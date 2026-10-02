@@ -1,13 +1,13 @@
+import { httpResource } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { ComingSoon } from '../../../shared/coming-soon/coming-soon';
+import { PublicProject } from './project';
 
 @Component({
   selector: 'app-projects',
-  imports: [ComingSoon],
-  template: `<app-coming-soon
-    eyebrow="Work"
-    heading="Projects"
-    summary="Case studies of selected projects, with architecture notes and links to source, will appear here."
-  />`,
+  templateUrl: './projects.html',
+  styleUrl: './projects.css',
 })
-export class Projects {}
+export class Projects {
+  // The backend already filters to published projects and sorts them; the page keeps that order.
+  protected readonly projects = httpResource<PublicProject[]>(() => '/api/v1/projects');
+}

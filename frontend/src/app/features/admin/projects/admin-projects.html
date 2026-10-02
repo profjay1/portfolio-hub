@@ -1,0 +1,104 @@
+<div class="page-head">
+  <h1>Projects</h1>
+  <button type="button" class="button button-primary" id="new-project" (click)="openNew()">
+    New project
+  </button>
+</div>
+
+@if (actionError(); as message) {
+  <p class="notice notice-error" role="alert">{{ message }}</p>
+}
+
+<p class="state" role="status">
+  @if (projects.isLoading()) {
+    Loading projects…
+  } @else if (loadError(); as message) {
+    {{ message }}
+  } @else if (projects.hasValue() && projects.value().length === 0) {
+    No projects yet.
+  } @else if (savedMessage(); as message) {
+    {{ message }}
+  }
+</p>
+
+@if (panel(); as open) {
+  <div class="form-panel">
+    <app-project-form
+      [project]="open.project"
+      (saved)="onSaved($event)"
+      (cancelled)="onCancelled()"
+    />
+  </div>
+}
+
+@if (projects.hasValue() && projects.value().length > 0) {
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        All projects, including drafts, in display order
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Title</th>
+          <th scope="col">Order</th>
+          <th scope="col">Status</th>
+          <th scope="col">Created</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (project of projects.value(); track project.id) {
+          <tr>
+            <th scope="row">{{ project.title }}</th>
+            <td>{{ project.displayOrder }}</td>
+            <td>
+              <span class="badge" [class.badge-live]="project.published">{{
+                project.published ? 'Published' : 'Draft'
+              }}</span>
+            </td>
+            <td>{{ formatCreated(project.createdAt) }}</td>
+            <td class="actions">
+              @if (confirmingDeleteId() === project.id) {
+                <span class="confirm-text">Delete {{ project.title }}?</span>
+                <button
+                  type="button"
+                  class="button button-danger"
+                  [id]="'confirm-delete-' + project.id"
+                  [disabled]="deletingId() === project.id"
+                  (click)="confirmDelete(project)"
+                >
+                  Confirm delete
+                </button>
+                <button
+                  type="button"
+                  class="button"
+                  [disabled]="deletingId() === project.id"
+                  (click)="cancelDelete(project)"
+                >
+                  Cancel
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="button"
+                  [id]="'edit-' + project.id"
+                  (click)="openEdit(project)"
+                >
+                  Edit<span class="visually-hidden"> {{ project.title }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="button"
+                  [id]="'delete-' + project.id"
+                  (click)="askToDelete(project)"
+                >
+                  Delete<span class="visually-hidden"> {{ project.title }}</span>
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
