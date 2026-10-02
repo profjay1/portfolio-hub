@@ -1,0 +1,41 @@
+<section class="page-intro">
+  <p class="eyebrow">Work</p>
+  <h1>Projects</h1>
+  <p class="lede">A selection of things I have designed, built and shipped.</p>
+</section>
+
+<!-- One live region for every non-list state, so screen readers hear loading, empty and error alike. -->
+<p class="state" role="status">
+  @if (projects.isLoading()) {
+    Loading projects…
+  } @else if (projects.error()) {
+    Projects couldn't be loaded right now. Please try again later.
+  } @else if (projects.hasValue() && projects.value().length === 0) {
+    No projects are published yet. Check back soon.
+  }
+</p>
+
+@if (projects.hasValue() && projects.value().length > 0) {
+  <ul class="card-grid">
+    @for (project of projects.value(); track project.id) {
+      <li>
+        <article class="card project">
+          @if (project.imageUrl) {
+            <img [src]="project.imageUrl" [alt]="project.title + ' preview'" loading="lazy" />
+          }
+          <h2>{{ project.title }}</h2>
+          @if (project.description) {
+            <p>{{ project.description }}</p>
+          }
+          @if (project.url) {
+            <a [href]="project.url" target="_blank" rel="noopener noreferrer"
+              >View project<span class="visually-hidden">
+                {{ project.title }} (opens in a new tab)</span
+              ></a
+            >
+          }
+        </article>
+      </li>
+    }
+  </ul>
+}
