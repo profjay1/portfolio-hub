@@ -78,11 +78,34 @@ describe('AdminProjects', () => {
     await fixture.whenStable();
   }
 
-  /** The list reloads after a delete; wait for that request to be sent, answer it, then let the page settle. */
+  /** The list reloads after a change; wait for that request to be sent, answer it, then let the page settle. */
   async function answerReload(projects: AdminProject[]): Promise<void> {
     const reload = await vi.waitFor(() => http.expectOne(LIST));
     reload.flush(projects);
     await fixture.whenStable();
+  }
+
+  /** Finds a control the way assistive technology does: through its <label>. */
+  function field(label: string): HTMLInputElement | HTMLTextAreaElement {
+    const labelEl = Array.from(host().querySelectorAll('label')).find(
+      (l) => l.textContent?.replace(/\s+/g, ' ').trim() === label,
+    );
+    const control = labelEl && host().querySelector<HTMLInputElement>(`#${labelEl.htmlFor}`);
+    if (!control) {
+      throw new Error(`No control labelled "${label}"`);
+    }
+    return control;
+  }
+
+  async function type(label: string, value: string): Promise<void> {
+    const control = field(label);
+    control.value = value;
+    control.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+  }
+
+  function openForm(): HTMLFormElement | null {
+    return host().querySelector('form');
   }
 
   it('shows a loading message while projects load', () => {
@@ -185,5 +208,71 @@ describe('AdminProjects', () => {
 
     await answerReload([]);
     expect(text('[role="alert"]')).toBe('Portfolio Hub had already been deleted.');
+  });
+
+  it('creates a project from the list and refreshes it', async () => {
+    await load([hub]);
+
+    await click('New project');
+    expect(openForm()?.querySelector('h2')?.textContent?.trim()).toBe('New project');
+    await type('Title', 'Side project');
+    await type('Display order', '2');
+
+    button('Create project').click(); // POST is sent synchronously; don't wait for stability yet
+    const create = http.expectOne({ method: 'POST', url: LIST });
+    expect(create.request.body).toEqual(
+      expect.objectContaining({ title: 'Side project', displayOrder: 2 }),
+    );
+    const created: AdminProject = { ...draft, id: 3, title: 'Side project', displayOrder: 2 };
+    create.flush(created);
+
+    await answerReload([hub, created]);
+    expect(openForm()).toBeNull();
+    expect(rows().map(([title]) => title)).toEqual(['Portfolio Hub', 'Side project']);
+    expect(text('[role="status"]')).toBe('Saved Side project.');
+    expect(document.activeElement).toBe(button('New project'));
+  });
+
+  it('edits a project from its row via a full replace', async () => {
+    await load([draft, hub]);
+
+    await click('Edit Portfolio Hub');
+    expect(openForm()?.querySelector('h2')?.textContent?.trim()).toBe('Edit Portfolio Hub');
+    expect(field('Title').value).toBe('Portfolio Hub');
+    await type('Title', 'Portfolio Hub v2');
+
+    button('Save changes').click(); // PUT is sent synchronously; don't wait for stability yet
+    const replace = http.expectOne(`${LIST}/1`);
+    expect(replace.request.method).toBe('PUT');
+    expect(replace.request.body).toEqual({
+      title: 'Portfolio Hub v2',
+      description: 'A modular monolith',
+      url: 'https://example.com',
+      imageUrl: '',
+      displayOrder: 1,
+      published: true,
+    });
+    const updated: AdminProject = { ...hub, title: 'Portfolio Hub v2' };
+    replace.flush(updated);
+
+    await answerReload([draft, updated]);
+    expect(openForm()).toBeNull();
+    expect(rows().map(([title]) => title)).toEqual(['Draft idea', 'Portfolio Hub v2']);
+    expect(text('[role="status"]')).toBe('Saved Portfolio Hub v2.');
+    // Focus returns to the row's Edit button, whose accessible name now carries the new title.
+    expect(document.activeElement).toBe(button('Edit Portfolio Hub v2'));
+  });
+
+  it('closes the form without saving when cancelled', async () => {
+    await load([hub]);
+
+    await click('New project');
+    await type('Title', 'Never mind');
+    await click('Cancel');
+
+    http.expectNone({ method: 'POST', url: LIST });
+    expect(openForm()).toBeNull();
+    expect(rows().map(([title]) => title)).toEqual(['Portfolio Hub']);
+    expect(document.activeElement).toBe(button('New project'));
   });
 });

@@ -11,6 +11,16 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { AdminProject } from './admin-project';
 import { ADMIN_PROJECTS_URL, AdminProjectsApi } from './admin-projects-api';
+import { ProjectForm } from './project-form';
+
+/** The open form panel: `project` is null when creating, the row being edited otherwise. */
+interface FormPanel {
+  readonly project: AdminProject | null;
+  /** Id of the button that opened the panel, so focus can go back to it when the panel closes. */
+  readonly returnFocusTo: string;
+}
+
+const NEW_PROJECT_BUTTON = 'new-project';
 
 /**
  * The browser's own formatter rather than Angular's DatePipe: DatePipe and its locale data live in framework files the
@@ -20,6 +30,7 @@ const createdDate = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' });
 
 @Component({
   selector: 'app-admin-projects',
+  imports: [ProjectForm],
   templateUrl: './admin-projects.html',
   styleUrl: './admin-projects.css',
 })
@@ -34,6 +45,9 @@ export class AdminProjects {
   protected readonly confirmingDeleteId = signal<number | null>(null);
   protected readonly deletingId = signal<number | null>(null);
   protected readonly actionError = signal<string | null>(null);
+  protected readonly panel = signal<FormPanel | null>(null);
+  /** Announced in the status region after a save; the panel closing on its own would be silent. */
+  protected readonly savedMessage = signal<string | null>(null);
 
   protected readonly loadError = computed(() => {
     const error = this.projects.error();
@@ -55,8 +69,36 @@ export class AdminProjects {
     return createdDate.format(new Date(iso));
   }
 
+  protected openNew(): void {
+    this.openPanel({ project: null, returnFocusTo: NEW_PROJECT_BUTTON });
+  }
+
+  protected openEdit(project: AdminProject): void {
+    // Restored by id, not by the button's name: the name includes the title, which the edit may change.
+    this.openPanel({ project, returnFocusTo: `edit-${project.id}` });
+  }
+
+  /**
+   * Synchronous on purpose: the async save (and its PendingTasks registration) lives in ProjectForm.save(), and the
+   * reload below is an httpResource request, which Angular already tracks as a pending task.
+   */
+  protected onSaved(project: AdminProject): void {
+    const returnFocusTo = this.panel()?.returnFocusTo ?? NEW_PROJECT_BUTTON;
+    this.panel.set(null);
+    this.savedMessage.set(`Saved ${project.title}.`);
+    this.projects.reload();
+    this.focusAfterRender(returnFocusTo);
+  }
+
+  protected onCancelled(): void {
+    const returnFocusTo = this.panel()?.returnFocusTo ?? NEW_PROJECT_BUTTON;
+    this.panel.set(null);
+    this.focusAfterRender(returnFocusTo);
+  }
+
   protected askToDelete(project: AdminProject): void {
     this.actionError.set(null);
+    this.savedMessage.set(null);
     this.confirmingDeleteId.set(project.id);
     this.focusAfterRender(`confirm-delete-${project.id}`);
   }
@@ -86,6 +128,14 @@ export class AdminProjects {
       this.confirmingDeleteId.set(null);
       done();
     }
+  }
+
+  private openPanel(panel: FormPanel): void {
+    this.actionError.set(null);
+    this.savedMessage.set(null);
+    this.panel.set(panel);
+    // The form's heading is focusable (tabindex="-1"), so keyboard and screen-reader users land on the form.
+    this.focusAfterRender('project-form-heading');
   }
 
   /** Keeps keyboard focus on the control that replaced the one just activated. */

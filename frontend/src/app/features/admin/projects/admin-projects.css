@@ -97,3 +97,7 @@ tbody th {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.form-panel {
+  margin-block-end: var(--space-5);
+}

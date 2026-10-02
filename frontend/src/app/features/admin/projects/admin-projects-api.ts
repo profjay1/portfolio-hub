@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { AdminProject, ProjectRequest } from './admin-project';
 
 export const ADMIN_PROJECTS_URL = '/api/v1/admin/projects';
 
@@ -11,6 +12,14 @@ export const ADMIN_PROJECTS_URL = '/api/v1/admin/projects';
 @Injectable({ providedIn: 'root' })
 export class AdminProjectsApi {
   private readonly http = inject(HttpClient);
+
+  create(project: ProjectRequest): Observable<AdminProject> {
+    return this.http.post<AdminProject>(ADMIN_PROJECTS_URL, project);
+  }
+
+  replace(id: number, project: ProjectRequest): Observable<AdminProject> {
+    return this.http.put<AdminProject>(`${ADMIN_PROJECTS_URL}/${id}`, project);
+  }
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${ADMIN_PROJECTS_URL}/${id}`);

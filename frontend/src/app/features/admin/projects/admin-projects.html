@@ -1,5 +1,8 @@
 <div class="page-head">
   <h1>Projects</h1>
+  <button type="button" class="button button-primary" id="new-project" (click)="openNew()">
+    New project
+  </button>
 </div>
 
 @if (actionError(); as message) {
@@ -13,8 +16,20 @@
     {{ message }}
   } @else if (projects.hasValue() && projects.value().length === 0) {
     No projects yet.
+  } @else if (savedMessage(); as message) {
+    {{ message }}
   }
 </p>
+
+@if (panel(); as open) {
+  <div class="form-panel">
+    <app-project-form
+      [project]="open.project"
+      (saved)="onSaved($event)"
+      (cancelled)="onCancelled()"
+    />
+  </div>
+}
 
 @if (projects.hasValue() && projects.value().length > 0) {
   <div class="table-wrap">
@@ -63,6 +78,14 @@
                   Cancel
                 </button>
               } @else {
+                <button
+                  type="button"
+                  class="button"
+                  [id]="'edit-' + project.id"
+                  (click)="openEdit(project)"
+                >
+                  Edit<span class="visually-hidden"> {{ project.title }}</span>
+                </button>
                 <button
                   type="button"
                   class="button"
