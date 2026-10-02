@@ -4,21 +4,6 @@
   min-block-size: 100dvh;
 }
 
-.skip-link {
-  position: absolute;
-  inset-inline-start: var(--space-3);
-  inset-block-start: -100%;
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  border-radius: var(--radius-sm);
-  z-index: 10;
-}
-
-.skip-link:focus {
-  inset-block-start: var(--space-3);
-}
-
 .site-header {
   position: sticky;
   inset-block-start: 0;
