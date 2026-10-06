@@ -70,7 +70,7 @@ interface Upload {
 @Component({
   selector: 'app-admin-resume',
   templateUrl: './admin-resume.html',
-  styleUrl: './admin-resume.css',
+  styleUrls: ['../admin-shared.css', './admin-resume.css'],
 })
 export class AdminResume {
   private readonly api = inject(AdminResumeApi);
