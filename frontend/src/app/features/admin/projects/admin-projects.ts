@@ -32,7 +32,7 @@ const createdDate = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' });
   selector: 'app-admin-projects',
   imports: [ProjectForm],
   templateUrl: './admin-projects.html',
-  styleUrl: './admin-projects.css',
+  styleUrls: ['../admin-shared.css', './admin-projects.css'],
 })
 export class AdminProjects {
   private readonly api = inject(AdminProjectsApi);
