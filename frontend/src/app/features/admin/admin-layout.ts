@@ -7,7 +7,7 @@ interface AdminLink {
 }
 
 /**
- * Shell for every admin screen. Later admin areas (resume, contact messages) add a link here and a child route in
+ * Shell for every admin screen. Later admin areas (contact messages) add a link here and a child route in
  * admin.routes.ts. Not guarded yet: the auth guard arrives with the login slice.
  */
 @Component({
@@ -17,5 +17,8 @@ interface AdminLink {
   styleUrl: './admin-layout.css',
 })
 export class AdminLayout {
-  protected readonly links: readonly AdminLink[] = [{ path: '/admin/projects', label: 'Projects' }];
+  protected readonly links: readonly AdminLink[] = [
+    { path: '/admin/projects', label: 'Projects' },
+    { path: '/admin/resume', label: 'Resume' },
+  ];
 }

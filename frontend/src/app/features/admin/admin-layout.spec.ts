@@ -17,7 +17,10 @@ describe('AdminLayout', () => {
       host.querySelectorAll<HTMLAnchorElement>('nav[aria-label="Admin"] a'),
     ).map((a) => [a.textContent?.trim(), a.getAttribute('href')]);
 
-    expect(links).toEqual([['Projects', '/admin/projects']]);
+    expect(links).toEqual([
+      ['Projects', '/admin/projects'],
+      ['Resume', '/admin/resume'],
+    ]);
   });
 
   it('offers a way back to the public site', async () => {
