@@ -1,0 +1,8 @@
+.download {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+.muted-label {
+  opacity: 0.85;
+}
