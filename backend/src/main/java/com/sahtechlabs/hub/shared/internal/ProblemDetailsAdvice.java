@@ -19,6 +19,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
@@ -44,6 +45,16 @@ class ProblemDetailsAdvice extends ResponseEntityExceptionHandler {
                 .map(error -> new FieldError(error.getField(), error.getDefaultMessage()))
                 .sorted(Comparator.comparing(FieldError::field))
                 .toList());
+        return handleExceptionInternal(ex, problem, headers, status, request);
+    }
+
+    @Override
+    protected @Nullable ResponseEntity<Object> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        // The container rejected the body before any controller saw it; modules may add their own, tighter limits.
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, "The uploaded file is too large.");
+        problem.setTitle("File too large");
+        problem.setProperty("code", "file-too-large");
         return handleExceptionInternal(ex, problem, headers, status, request);
     }
 

@@ -1,6 +1,12 @@
 spring:
   application:
     name: hub
+  servlet:
+    multipart:
+      # Slightly above the resume limit so the container rejects huge bodies early, while the resume module's own
+      # check (hub.resume.max-size) gives the precise error for anything in between.
+      max-file-size: 11MB
+      max-request-size: 11MB
 
 # Only health and info are reachable over HTTP; every other actuator endpoint stays unexposed (404).
 management:
@@ -23,6 +29,11 @@ hub:
   jwt:
     # The signing secret has no default: it comes only from HUB_JWT_SECRET.
     ttl: 1h
+  resume:
+    # No default: uploads must land on a directory the operator chose (and backs up). Mapped explicitly because
+    # relaxed binding would read HUB_RESUME_STORAGE_PATH as hub.resume.storage.path.
+    storage-path: ${HUB_RESUME_STORAGE_PATH}
+    max-size: 10MB
 
 logging:
   pattern:
