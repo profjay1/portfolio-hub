@@ -48,5 +48,7 @@ Thumbs.db
 
 # --- Docker / local runtime ---
 infra/compose/data/
+# Local resume uploads (HUB_RESUME_STORAGE_PATH in .env.example).
+var/
 *.local.yml
 !compose.local.yml
