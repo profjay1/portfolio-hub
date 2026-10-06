@@ -1,0 +1,98 @@
+<h1>Resume</h1>
+
+<section class="upload" aria-labelledby="upload-heading">
+  <h2 id="upload-heading">Upload a new version</h2>
+  <p class="hint" id="upload-hint">
+    PDF only, up to 10 MB. The new file replaces the public resume; earlier versions stay in the
+    history.
+  </p>
+
+  <form (submit)="submit($event)">
+    <label for="resume-file">Resume PDF</label>
+    <input
+      #fileInput
+      id="resume-file"
+      type="file"
+      accept="application/pdf,.pdf"
+      aria-describedby="upload-hint"
+      [disabled]="upload() !== null"
+      (change)="onFileChosen($event)"
+    />
+    <button type="submit" class="button button-primary" [disabled]="upload() !== null">
+      Upload
+    </button>
+  </form>
+
+  @if (uploadError(); as message) {
+    <p class="notice notice-error" role="alert">{{ message }}</p>
+  }
+
+  <!-- Announces the phase, not every percentage change, so screen readers are not flooded. -->
+  <p class="state" role="status">
+    @if (upload(); as current) {
+      {{ saving() ? 'Saving…' : 'Uploading ' + current.filename + '…' }}
+    } @else if (uploadedMessage(); as message) {
+      {{ message }}
+    }
+  </p>
+  @if (upload(); as current) {
+    <div class="progress">
+      @if (current.percent !== null) {
+        <progress max="100" [value]="current.percent" aria-label="Upload progress"></progress>
+        <span aria-hidden="true">{{ current.percent }}%</span>
+      } @else {
+        <progress aria-label="Upload progress"></progress>
+      }
+    </div>
+  }
+</section>
+
+<section aria-labelledby="history-heading">
+  <h2 id="history-heading">Upload history</h2>
+
+  <p class="state" role="status">
+    @if (history.isLoading()) {
+      Loading upload history…
+    } @else if (loadError(); as message) {
+      {{ message }}
+    } @else if (history.hasValue() && history.value().length === 0) {
+      No resume uploaded yet. Visitors can't download one until you upload a PDF.
+    }
+  </p>
+
+  @if (history.hasValue() && history.value().length > 0) {
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">
+          Every uploaded resume, newest first
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">File</th>
+            <th scope="col">Uploaded</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (version of history.value(); track version.id) {
+            <tr>
+              <th scope="row">{{ version.filename }}</th>
+              <td>
+                <time [attr.datetime]="version.uploadedAt">{{
+                  formatUploaded(version.uploadedAt)
+                }}</time>
+              </td>
+              <td>
+                @if (version.active) {
+                  <span class="badge badge-live">Active</span>
+                } @else {
+                  <span class="badge">Previous</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
