@@ -77,6 +77,8 @@ class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/v1/ping").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/projects").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/resume/download").permitAll()
+                        // Public, but still CSRF-protected like every unsafe request.
+                        .requestMatchers(HttpMethod.POST, "/api/v1/contact").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**", "/actuator/info")
                                 .permitAll()
                         // Logout stays public so an expired session can still clear its cookie.
