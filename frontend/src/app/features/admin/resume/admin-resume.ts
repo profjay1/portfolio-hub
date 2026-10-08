@@ -1,4 +1,4 @@
-import { HttpErrorResponse, HttpEventType, httpResource } from '@angular/common/http';
+import { HttpErrorResponse, httpResource } from '@angular/common/http';
 import {
   Component,
   ElementRef,
@@ -8,7 +8,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { filter, lastValueFrom, map, tap } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { ADMIN_RESUME_URL, AdminResumeApi } from './admin-resume-api';
 import { ResumeUpload } from './resume-upload';
 
@@ -57,12 +57,6 @@ function codeOf(body: unknown): string | null {
   return null;
 }
 
-/** An upload in flight. `percent` is null when the browser cannot tell the total size. */
-interface Upload {
-  readonly filename: string;
-  readonly percent: number | null;
-}
-
 /**
  * Upload history plus the upload form. A plain file input rather than Signal Forms: Signal Forms binds values, and a
  * file input's value cannot be set from code, so there is nothing for a form model to hold besides the File itself.
@@ -80,12 +74,10 @@ export class AdminResume {
   protected readonly history = httpResource<ResumeUpload[]>(() => ADMIN_RESUME_URL);
 
   protected readonly selected = signal<File | null>(null);
-  protected readonly upload = signal<Upload | null>(null);
+  /** Name of the file being uploaded, while a request is in flight. */
+  protected readonly uploading = signal<string | null>(null);
   protected readonly uploadError = signal<string | null>(null);
   protected readonly uploadedMessage = signal<string | null>(null);
-
-  /** Bytes all sent but no response yet: the server is validating and storing the file. */
-  protected readonly saving = computed(() => this.upload()?.percent === 100);
 
   protected readonly loadError = computed(() => {
     const error = this.history.error();
@@ -132,30 +124,17 @@ export class AdminResume {
     // Zoneless Angular cannot see this promise chain; registering it keeps the app "unstable" until the outcome is
     // rendered, which is what tests (whenStable) and, later, SSR wait for. Same pattern as AdminProjects.
     const done = this.pendingTasks.add();
-    this.upload.set({ filename: file.name, percent: 0 });
+    this.uploading.set(file.name);
     try {
-      const saved = await lastValueFrom(
-        this.api.upload(file).pipe(
-          tap((event) => {
-            if (event.type === HttpEventType.UploadProgress) {
-              const percent = event.total ? Math.round((event.loaded / event.total) * 100) : null;
-              this.upload.set({ filename: file.name, percent });
-            }
-          }),
-          filter((event) => event.type === HttpEventType.Response),
-          map((response) => response.body),
-        ),
-      );
-      this.uploadedMessage.set(
-        `Uploaded ${saved?.filename ?? file.name}. It is now the public resume.`,
-      );
+      const saved = await firstValueFrom(this.api.upload(file));
+      this.uploadedMessage.set(`Uploaded ${saved.filename}. It is now the public resume.`);
       this.selected.set(null);
       this.fileInput().nativeElement.value = '';
       this.history.reload();
     } catch (error) {
       this.uploadError.set(this.messageFor(error));
     } finally {
-      this.upload.set(null);
+      this.uploading.set(null);
       done();
     }
   }
