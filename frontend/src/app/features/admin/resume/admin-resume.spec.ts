@@ -1,4 +1,4 @@
-import { HttpEventType, provideHttpClient } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdminResume } from './admin-resume';
@@ -161,7 +161,7 @@ describe('AdminResume', () => {
     expect(fileInput().accept).toBe('application/pdf,.pdf');
   });
 
-  it('uploads the chosen PDF as multipart, shows progress, then refreshes the history', async () => {
+  it('uploads the chosen PDF as multipart, shows it is busy, then refreshes the history', async () => {
     await load([previous]);
     const file = pdf('Jane Doe CV.pdf');
     await choose(file);
@@ -175,15 +175,14 @@ describe('AdminResume', () => {
     expect((part as File).type).toBe('application/pdf');
     expect(await (part as File).text()).toBe(await file.text());
 
-    request.event({ type: HttpEventType.UploadProgress, loaded: 40, total: 100 });
-    fixture.detectChanges();
+    // No progress events: the app's Fetch HTTP backend cannot report upload progress, so the bar is indeterminate
+    // (no value attribute) for the whole request rather than stuck at a made-up percentage.
     expect(uploadStatus()).toBe('Uploading Jane Doe CV.pdf…');
-    expect(host().querySelector('progress')?.value).toBe(40);
+    const bar = host().querySelector('progress');
+    expect(bar).not.toBeNull();
+    expect(bar?.hasAttribute('value')).toBe(false);
     expect(host().querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
-
-    request.event({ type: HttpEventType.UploadProgress, loaded: 100, total: 100 });
-    fixture.detectChanges();
-    expect(uploadStatus()).toBe('Saving…');
+    expect(fileInput().disabled).toBe(true);
 
     request.flush(
       { ...current, filename: 'Jane Doe CV.pdf' },

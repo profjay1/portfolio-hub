@@ -15,10 +15,10 @@
       type="file"
       accept="application/pdf,.pdf"
       aria-describedby="upload-hint"
-      [disabled]="upload() !== null"
+      [disabled]="uploading() !== null"
       (change)="onFileChosen($event)"
     />
-    <button type="submit" class="button button-primary" [disabled]="upload() !== null">
+    <button type="submit" class="button button-primary" [disabled]="uploading() !== null">
       Upload
     </button>
   </form>
@@ -27,23 +27,16 @@
     <p class="notice notice-error" role="alert">{{ message }}</p>
   }
 
-  <!-- Announces the phase, not every percentage change, so screen readers are not flooded. -->
   <p class="state" role="status">
-    @if (upload(); as current) {
-      {{ saving() ? 'Saving…' : 'Uploading ' + current.filename + '…' }}
+    @if (uploading(); as filename) {
+      Uploading {{ filename }}…
     } @else if (uploadedMessage(); as message) {
       {{ message }}
     }
   </p>
-  @if (upload(); as current) {
-    <div class="progress">
-      @if (current.percent !== null) {
-        <progress max="100" [value]="current.percent" aria-label="Upload progress"></progress>
-        <span aria-hidden="true">{{ current.percent }}%</span>
-      } @else {
-        <progress aria-label="Upload progress"></progress>
-      }
-    </div>
+  @if (uploading()) {
+    <!-- Indeterminate: the Fetch HTTP backend cannot report upload progress, so no percentage is invented. -->
+    <progress aria-label="Upload progress"></progress>
   }
 </section>
 
