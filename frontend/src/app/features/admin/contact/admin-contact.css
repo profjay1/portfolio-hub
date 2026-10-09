@@ -1,0 +1,62 @@
+/* Shared admin rules (status, notices, tables, badges) live in ../admin-shared.css. */
+h1:focus,
+h2:focus {
+  outline: none;
+}
+
+.detail-panel {
+  display: grid;
+  gap: var(--space-3);
+  max-inline-size: 48rem;
+  margin-block-end: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.detail-panel h2 {
+  margin: 0;
+  font-size: var(--text-xl);
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.meta dt {
+  color: var(--color-muted);
+}
+
+.meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Keeps the sender's line breaks; long unbroken strings (URLs) wrap instead of widening the page. */
+.message-body {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.actions {
+  text-align: end;
+}
+
+/* Unread stands out from read; the word itself carries the meaning, so colour is not the only signal. */
+.badge-unread {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  font-weight: 600;
+}

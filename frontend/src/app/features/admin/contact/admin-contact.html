@@ -1,0 +1,104 @@
+<h1 id="contact-heading" tabindex="-1">Contact messages</h1>
+
+@if (actionError(); as message) {
+  <p class="notice notice-error" role="alert">{{ message }}</p>
+}
+
+<p class="state" role="status">
+  @if (messages.isLoading()) {
+    Loading messages…
+  } @else if (loadError(); as message) {
+    {{ message }}
+  } @else if (messages.hasValue() && messages.value().length === 0) {
+    No messages yet.
+  } @else if (statusMessage(); as message) {
+    {{ message }}
+  }
+</p>
+
+@if (openMessage(); as message) {
+  <section class="detail-panel" aria-labelledby="message-heading">
+    <h2 id="message-heading" tabindex="-1">Message from {{ message.name }}</h2>
+
+    <dl class="meta">
+      <dt>Email</dt>
+      <dd>
+        <a [href]="'mailto:' + message.email">{{ message.email }}</a>
+      </dd>
+      <dt>Received</dt>
+      <dd>
+        <time [attr.datetime]="message.createdAt">{{ formatReceived(message.createdAt) }}</time>
+      </dd>
+      <dt>Status</dt>
+      <dd>
+        <span class="badge" [class.badge-unread]="!message.read">{{
+          message.read ? 'Read' : 'Unread'
+        }}</span>
+      </dd>
+    </dl>
+
+    <!-- Interpolation, never innerHTML: the text comes from the public and is shown exactly as typed. -->
+    <p class="message-body">{{ message.message }}</p>
+
+    <div class="panel-actions">
+      @if (!message.read) {
+        <button
+          type="button"
+          class="button button-primary"
+          [disabled]="markingId() === message.id"
+          (click)="markRead(message)"
+        >
+          Mark as read
+        </button>
+      }
+      <button type="button" class="button" id="close-message" (click)="close()">Close</button>
+    </div>
+  </section>
+}
+
+@if (messages.hasValue() && messages.value().length > 0) {
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        All contact messages, newest first
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">From</th>
+          <th scope="col">Email</th>
+          <th scope="col">Received</th>
+          <th scope="col">Status</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (message of messages.value(); track message.id) {
+          <tr>
+            <th scope="row">{{ message.name }}</th>
+            <td>{{ message.email }}</td>
+            <td>
+              <time [attr.datetime]="message.createdAt">{{
+                formatReceived(message.createdAt)
+              }}</time>
+            </td>
+            <td>
+              <span class="badge" [class.badge-unread]="!message.read">{{
+                message.read ? 'Read' : 'Unread'
+              }}</span>
+            </td>
+            <td class="actions">
+              <button
+                type="button"
+                class="button"
+                [id]="'view-' + message.id"
+                (click)="open(message)"
+              >
+                View<span class="visually-hidden"> message from {{ message.name }}</span>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
