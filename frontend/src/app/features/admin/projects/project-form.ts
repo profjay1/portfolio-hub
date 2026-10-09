@@ -14,6 +14,7 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
+import { isValidationProblem } from '../../../core/validation-problem';
 import { AdminProject, ProjectRequest } from './admin-project';
 import { AdminProjectsApi } from './admin-projects-api';
 
@@ -68,19 +69,6 @@ function toModel(project: AdminProject | null): ProjectFormModel {
     displayOrder: project?.displayOrder ?? 0,
     published: project?.published ?? false,
   };
-}
-
-/** Problem Details body for a 400 from the backend's validation (see ProblemDetailsAdvice). */
-interface ValidationProblem {
-  readonly errors: readonly { readonly field: string; readonly message: string }[];
-}
-
-function isValidationProblem(body: unknown): body is ValidationProblem {
-  return (
-    typeof body === 'object' &&
-    body !== null &&
-    Array.isArray((body as { errors?: unknown }).errors)
-  );
 }
 
 /** Create (project is null) or edit (full replace) a project. Emits the server's saved copy. */

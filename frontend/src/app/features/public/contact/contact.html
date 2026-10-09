@@ -1,0 +1,109 @@
+<section class="page-intro">
+  <p class="eyebrow">Get in touch</p>
+  <h1>Contact</h1>
+  <p class="lede">
+    Recruiting, collaborating, or just curious about something here? Send a message and I'll reply
+    by email.
+  </p>
+</section>
+
+<form class="contact-form" novalidate (submit)="send($event)">
+  @if (form().errors().length > 0) {
+    <div class="notice notice-error" role="alert">
+      @for (error of form().errors(); track $index) {
+        <p>{{ error.message }}</p>
+      }
+    </div>
+  }
+
+  <div class="field">
+    <label for="contact-name">Name</label>
+    <input
+      id="contact-name"
+      type="text"
+      autocomplete="name"
+      [formField]="form.name"
+      [attr.aria-invalid]="showErrors(form.name) ? 'true' : null"
+      [attr.aria-describedby]="showErrors(form.name) ? 'contact-name-error' : null"
+    />
+    @if (showErrors(form.name)) {
+      <p class="field-error" id="contact-name-error">
+        @for (error of form.name().errors(); track $index) {
+          {{ error.message }}
+        }
+      </p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="contact-email">Email</label>
+    <input
+      id="contact-email"
+      type="email"
+      inputmode="email"
+      autocomplete="email"
+      [formField]="form.email"
+      [attr.aria-invalid]="showErrors(form.email) ? 'true' : null"
+      [attr.aria-describedby]="showErrors(form.email) ? 'contact-email-error' : null"
+    />
+    @if (showErrors(form.email)) {
+      <p class="field-error" id="contact-email-error">
+        @for (error of form.email().errors(); track $index) {
+          {{ error.message }}
+        }
+      </p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="contact-message">Message</label>
+    <textarea
+      id="contact-message"
+      rows="6"
+      [formField]="form.message"
+      [attr.aria-invalid]="showErrors(form.message) ? 'true' : null"
+      [attr.aria-describedby]="showErrors(form.message) ? 'contact-message-error' : null"
+    ></textarea>
+    @if (showErrors(form.message)) {
+      <p class="field-error" id="contact-message-error">
+        @for (error of form.message().errors(); track $index) {
+          {{ error.message }}
+        }
+      </p>
+    }
+  </div>
+
+  <!--
+    Honeypot. People never see or reach it, so only bots fill it in; the server discards those submissions.
+    visually-hidden: off screen for sighted users (not display:none, which some bots skip).
+    aria-hidden: screen readers don't announce it (visually-hidden alone would still be read out).
+    tabindex="-1": keyboard users never tab into it.
+    autocomplete="off": the browser doesn't autofill it and get a real visitor's message discarded.
+  -->
+  <div class="visually-hidden" aria-hidden="true">
+    <label for="contact-website">Website</label>
+    <input
+      id="contact-website"
+      type="text"
+      tabindex="-1"
+      autocomplete="off"
+      [formField]="form.website"
+    />
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="button button-primary" [disabled]="form().submitting()">
+      @if (form().submitting()) {
+        Sending…
+      } @else {
+        Send message
+      }
+    </button>
+  </div>
+
+  <p class="sent" role="status">
+    @if (showSent()) {
+      Message sent. Thanks for getting in touch; I'll reply by email.
+    }
+  </p>
+</form>
