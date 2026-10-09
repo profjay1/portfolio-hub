@@ -20,6 +20,7 @@ describe('AdminLayout', () => {
     expect(links).toEqual([
       ['Projects', '/admin/projects'],
       ['Resume', '/admin/resume'],
+      ['Contact', '/admin/contact'],
     ]);
   });
 
