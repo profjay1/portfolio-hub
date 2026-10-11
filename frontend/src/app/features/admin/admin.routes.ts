@@ -1,14 +1,17 @@
 import { Routes } from '@angular/router';
 import { AdminLayout } from './admin-layout';
 import { AdminContact } from './contact/admin-contact';
+import { AdminLogin } from './login/admin-login';
 import { AdminProjects } from './projects/admin-projects';
 import { AdminResume } from './resume/admin-resume';
 
 /**
  * Loaded lazily from app.routes.ts, so everything here stays out of the public bundle. Each admin area is a child
- * route here and a link in AdminLayout. No guard yet: it arrives with the login slice.
+ * route here and a link in AdminLayout. The login page sits beside AdminLayout, not inside it, so no admin navigation
+ * shows before signing in. No guard yet: it follows in the next #55 slice, once signing in works.
  */
 export const adminRoutes: Routes = [
+  { path: 'login', component: AdminLogin, title: 'Sign in · Admin' },
   {
     path: '',
     component: AdminLayout,
