@@ -1,0 +1,62 @@
+<main id="main" class="container login-main">
+  <form class="login-form" novalidate (submit)="signIn($event)">
+    <h1>Sign in</h1>
+    <p class="hint">The admin area is for the site owner.</p>
+
+    @if (form().errors().length > 0) {
+      <div class="notice notice-error" role="alert">
+        @for (error of form().errors(); track $index) {
+          <p>{{ error.message }}</p>
+        }
+      </div>
+    }
+
+    <div class="field">
+      <label for="login-email">Email</label>
+      <input
+        id="login-email"
+        type="email"
+        inputmode="email"
+        autocomplete="username"
+        spellcheck="false"
+        [formField]="form.email"
+        [attr.aria-invalid]="showErrors(form.email) ? 'true' : null"
+        [attr.aria-describedby]="showErrors(form.email) ? 'login-email-error' : null"
+      />
+      @if (showErrors(form.email)) {
+        <p class="field-error" id="login-email-error">
+          @for (error of form.email().errors(); track $index) {
+            {{ error.message }}
+          }
+        </p>
+      }
+    </div>
+
+    <div class="field">
+      <label for="login-password">Password</label>
+      <input
+        id="login-password"
+        type="password"
+        autocomplete="current-password"
+        [formField]="form.password"
+        [attr.aria-invalid]="showErrors(form.password) ? 'true' : null"
+        [attr.aria-describedby]="showErrors(form.password) ? 'login-password-error' : null"
+      />
+      @if (showErrors(form.password)) {
+        <p class="field-error" id="login-password-error">
+          @for (error of form.password().errors(); track $index) {
+            {{ error.message }}
+          }
+        </p>
+      }
+    </div>
+
+    <button type="submit" class="button button-primary" [disabled]="form().submitting()">
+      @if (form().submitting()) {
+        Signing in…
+      } @else {
+        Sign in
+      }
+    </button>
+  </form>
+</main>
