@@ -137,13 +137,11 @@ describe('AdminResume', () => {
     );
   });
 
-  it('explains that sign-in is required when the API answers 401', async () => {
+  it('says the session has ended when the API answers 401', async () => {
     http.expectOne(URL).flush(null, { status: 401, statusText: 'Unauthorized' });
     await fixture.whenStable();
 
-    expect(historyStatus()).toBe(
-      'You need to sign in to manage the resume. Sign-in arrives in a later release.',
-    );
+    expect(historyStatus()).toBe('Your session has ended. Sign in again to continue.');
   });
 
   it('shows a general error when the history fails to load for another reason', async () => {
@@ -237,11 +235,7 @@ describe('AdminResume', () => {
     [413, 'resume-too-large', 'The file is larger than 10 MB. Choose a smaller PDF.'],
     [413, 'file-too-large', 'The file is larger than 10 MB. Choose a smaller PDF.'],
     [413, null, 'The file is larger than 10 MB. Choose a smaller PDF.'],
-    [
-      401,
-      'unauthorized',
-      'You need to sign in to upload a resume. Sign-in arrives in a later release.',
-    ],
+    [401, 'unauthorized', 'Your session has ended. Sign in again to continue.'],
     [403, 'forbidden', "You don't have permission to upload a resume."],
     [500, 'internal-error', "The resume couldn't be uploaded. Please try again."],
   ])(

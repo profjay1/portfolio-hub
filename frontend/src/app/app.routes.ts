@@ -24,7 +24,7 @@ export const routes: Routes = [
     ],
   },
   {
-    // Lazy so visitors never download admin code. The auth guard arrives with the login slice.
+    // Lazy so visitors never download admin code. admin.routes.ts guards the area and holds the login page.
     path: 'admin',
     loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
   },

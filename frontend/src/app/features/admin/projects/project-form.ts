@@ -171,7 +171,7 @@ export class ProjectForm {
       return [
         {
           kind: 'server',
-          message: 'You need to sign in to save projects. Sign-in arrives in a later release.',
+          message: 'Your session has ended. Sign in again to continue.',
         },
       ];
     }

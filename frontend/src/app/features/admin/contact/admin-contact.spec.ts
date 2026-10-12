@@ -141,7 +141,7 @@ describe('AdminContact', () => {
   });
 
   it.each([
-    [401, 'You need to sign in to read messages. Sign-in arrives in a later release.'],
+    [401, 'Your session has ended. Sign in again to continue.'],
     [403, "You don't have permission to read messages."],
     [500, "Messages couldn't be loaded. Please try again."],
   ])('explains a %i while loading the inbox', async (code, message) => {
@@ -251,7 +251,7 @@ describe('AdminContact', () => {
   });
 
   it.each([
-    [401, 'You need to sign in to update messages. Sign-in arrives in a later release.'],
+    [401, 'Your session has ended. Sign in again to continue.'],
     [403, "You don't have permission to update messages."],
     [500, "The message couldn't be marked as read. Please try again."],
   ])('explains a %i and leaves the message unread', async (code, message) => {

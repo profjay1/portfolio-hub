@@ -12,6 +12,7 @@ import {
 } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import { AuthSession } from '../../../core/auth/auth-session';
+import { safeReturnUrl } from '../../../core/auth/return-url';
 import { isValidationProblem } from '../../../core/validation-problem';
 
 interface LoginFormModel {
@@ -20,8 +21,6 @@ interface LoginFormModel {
 }
 
 const EMPTY: LoginFormModel = { email: '', password: '' };
-
-export const DEFAULT_DESTINATION = '/admin/projects';
 
 /** One message for a wrong password and an unknown email alike, as the backend does: it names no field. */
 const INVALID_CREDENTIALS = 'The email or password is incorrect.';
@@ -49,24 +48,6 @@ function loginSchema(path: SchemaPathTree<LoginFormModel>): void {
   validate(path.password, ({ value }) =>
     value() === '' ? { kind: 'required', message: 'Enter your password.' } : null,
   );
-}
-
-/**
- * Where to go after signing in. Only admin pages qualify, never the login page itself (a loop), and nothing that could
- * be read as another origin. Router.navigateByUrl cannot leave the app, so this is defence in depth: the value comes
- * from the query string, which anyone can write into a link.
- */
-export function safeReturnUrl(value: string | null | undefined): string {
-  if (
-    !value ||
-    !value.startsWith('/admin/') ||
-    value.startsWith('/admin/login') ||
-    value.includes('//') ||
-    value.includes('\\')
-  ) {
-    return DEFAULT_DESTINATION;
-  }
-  return value;
 }
 
 /** The admin sign-in page. Lives outside AdminLayout, so nothing of the admin area shows before signing in. */

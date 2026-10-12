@@ -85,9 +85,10 @@ export class AdminResume {
       return null;
     }
     const status = error instanceof HttpErrorResponse ? error.status : 0;
-    // No auth guard yet (login slice): until then the API answers 401 and the page says why.
+    // Inside the guarded admin area a 401 means the session expired: the interceptor sends the admin to sign in,
+    // and this shows for the moment before that navigation.
     if (status === 401) {
-      return 'You need to sign in to manage the resume. Sign-in arrives in a later release.';
+      return 'Your session has ended. Sign in again to continue.';
     }
     if (status === 403) {
       return "You don't have permission to manage the resume.";
@@ -152,7 +153,7 @@ export class AdminResume {
       return TOO_LARGE;
     }
     if (error.status === 401) {
-      return 'You need to sign in to upload a resume. Sign-in arrives in a later release.';
+      return 'Your session has ended. Sign in again to continue.';
     }
     if (error.status === 403) {
       return "You don't have permission to upload a resume.";
