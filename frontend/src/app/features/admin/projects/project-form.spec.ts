@@ -227,16 +227,14 @@ describe('ProjectForm', () => {
       expect(formError()).toBe('somethingNew: is not allowed');
     });
 
-    it('explains that sign-in is required when the API answers 401', async () => {
+    it('says the session has ended when the API answers 401', async () => {
       await fillValidProject();
 
       button('Create project').click();
       http.expectOne(LIST).flush(null, { status: 401, statusText: 'Unauthorized' });
       await fixture.whenStable();
 
-      expect(formError()).toBe(
-        'You need to sign in to save projects. Sign-in arrives in a later release.',
-      );
+      expect(formError()).toBe('Your session has ended. Sign in again to continue.');
     });
 
     it('keeps what was typed and says so when saving fails unexpectedly', async () => {

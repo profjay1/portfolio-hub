@@ -7,8 +7,8 @@ interface AdminLink {
 }
 
 /**
- * Shell for every admin screen. Each admin area adds a link here and a child route in admin.routes.ts. Not guarded
- * yet: the auth guard arrives with the login slice.
+ * Shell for every admin screen. Each admin area adds a link here and a child route in admin.routes.ts, where the
+ * route guard keeps it to signed-in admins.
  */
 @Component({
   selector: 'app-admin-layout',

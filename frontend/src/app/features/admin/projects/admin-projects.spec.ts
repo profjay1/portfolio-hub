@@ -132,13 +132,11 @@ describe('AdminProjects', () => {
     expect(text('[role="status"]')).toBe('No projects yet.');
   });
 
-  it('explains that sign-in is required when the API answers 401', async () => {
+  it('says the session has ended when the API answers 401', async () => {
     http.expectOne(LIST).flush(null, { status: 401, statusText: 'Unauthorized' });
     await fixture.whenStable();
 
-    expect(text('[role="status"]')).toBe(
-      'You need to sign in to manage projects. Sign-in arrives in a later release.',
-    );
+    expect(text('[role="status"]')).toBe('Your session has ended. Sign in again to continue.');
   });
 
   it('explains when the signed-in user is not allowed to manage projects', async () => {

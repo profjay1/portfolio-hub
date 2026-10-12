@@ -60,9 +60,10 @@ export class AdminContact {
       return null;
     }
     const status = error instanceof HttpErrorResponse ? error.status : 0;
-    // No auth guard yet (login slice): until then the API answers 401 and the page says why.
+    // Inside the guarded admin area a 401 means the session expired: the interceptor sends the admin to sign in,
+    // and this shows for the moment before that navigation.
     if (status === 401) {
-      return 'You need to sign in to read messages. Sign-in arrives in a later release.';
+      return 'Your session has ended. Sign in again to continue.';
     }
     if (status === 403) {
       return "You don't have permission to read messages.";
@@ -121,7 +122,7 @@ export class AdminContact {
       return 'This message no longer exists.';
     }
     if (status === 401) {
-      return 'You need to sign in to update messages. Sign-in arrives in a later release.';
+      return 'Your session has ended. Sign in again to continue.';
     }
     if (status === 403) {
       return "You don't have permission to update messages.";
