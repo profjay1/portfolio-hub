@@ -16,7 +16,25 @@
       </ul>
     </nav>
 
-    <a class="view-site" routerLink="/">View site</a>
+    <div class="header-actions">
+      <a class="view-site" routerLink="/">View site</a>
+      @if (email(); as address) {
+        <p class="signed-in">
+          Signed in as <strong>{{ address }}</strong>
+        </p>
+      }
+      <button type="button" class="button sign-out" [disabled]="signingOut()" (click)="signOut()">
+        @if (signingOut()) {
+          Signing out…
+        } @else {
+          Sign out
+        }
+      </button>
+    </div>
+
+    @if (signOutError(); as message) {
+      <p class="notice notice-error sign-out-error" role="alert">{{ message }}</p>
+    }
   </div>
 </header>
 

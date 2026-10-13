@@ -14,7 +14,7 @@ describe('AdminLogin', () => {
 
   const admin: CurrentUser = { email: 'admin@example.com', role: 'ADMIN' };
 
-  async function render(returnUrl?: string): Promise<void> {
+  async function render(returnUrl?: string, signedOut?: string): Promise<void> {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     });
@@ -23,6 +23,9 @@ describe('AdminLogin', () => {
     fixture = TestBed.createComponent(AdminLogin);
     if (returnUrl !== undefined) {
       fixture.componentRef.setInput('returnUrl', returnUrl);
+    }
+    if (signedOut !== undefined) {
+      fixture.componentRef.setInput('signedOut', signedOut);
     }
     await fixture.whenStable();
   }
@@ -222,6 +225,34 @@ describe('AdminLogin', () => {
       await answer(admin, 200, 'OK');
 
       expect(navigateByUrl).toHaveBeenCalledExactlyOnceWith('/admin/projects');
+    });
+  });
+
+  describe('after signing out', () => {
+    function signedOutNotice(): string {
+      return squash(host().querySelector('[role="status"]')?.textContent);
+    }
+
+    it('confirms the sign-out, and gives way to a sign-in error rather than showing both', async () => {
+      await render(undefined, '1');
+
+      expect(signedOutNotice()).toBe("You've signed out.");
+      expect(formError()).toBe('');
+
+      await fillCredentials('admin@example.com', 'wrong password');
+      expect(signedOutNotice()).toBe("You've signed out."); // typing alone doesn't hide it
+      signIn();
+      await answer({ status: 401, code: 'invalid-credentials' }, 401, 'Unauthorized');
+
+      expect(formError()).toBe('The email or password is incorrect.');
+      expect(signedOutNotice()).toBe('');
+    });
+
+    it('says nothing about signing out when the visitor did not just sign out', async () => {
+      await render();
+
+      expect(host().querySelector('[role="status"]')).toBeNull();
+      expect(host().textContent).not.toContain('signed out');
     });
   });
 

@@ -27,8 +27,40 @@
   color: var(--color-accent);
 }
 
-.view-site {
+/* View site, who is signed in, and Sign out: pushed to the end of the top row, wrapping as a group on narrow screens. */
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
   margin-inline-start: auto;
+}
+
+.view-site,
+.signed-in {
+  font-size: var(--text-sm);
+}
+
+.signed-in {
+  margin: 0;
+  color: var(--color-muted);
+  overflow-wrap: anywhere;
+}
+
+.signed-in strong {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.sign-out {
+  font-size: var(--text-sm);
+}
+
+/* Its own full-width row under the header controls, so a long message never squeezes the nav. */
+.sign-out-error {
+  flex-basis: 100%;
+  order: 2;
+  margin: 0;
   font-size: var(--text-sm);
 }
 
