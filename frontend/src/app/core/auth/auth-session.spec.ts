@@ -1,10 +1,15 @@
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  TestRequest,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AuthSession, CurrentUser } from './auth-session';
 
 const ME = '/api/v1/auth/me';
 const LOGIN = '/api/v1/auth/login';
+const LOGOUT = '/api/v1/auth/logout';
 
 describe('AuthSession', () => {
   let session: AuthSession;
@@ -104,6 +109,43 @@ describe('AuthSession', () => {
     meRequest.flush(null, { status: 401, statusText: 'Unauthorized' }); // sent before the sign-in
 
     expect(await loaded).toEqual(admin);
+    expect(session.user()).toEqual(admin);
+  });
+
+  it('signs out on the server, then forgets the user', async () => {
+    const loaded = session.ensureLoaded();
+    http.expectOne(ME).flush(admin);
+    await loaded;
+
+    const signedOut = session.logout();
+    const request = http.expectOne({ method: 'POST', url: LOGOUT });
+    // Still signed in until the server confirms.
+    expect(session.user()).toEqual(admin);
+    // Exactly what the backend answers: 204 with no body.
+    request.flush(null, { status: 204, statusText: 'No Content' });
+    await signedOut;
+
+    expect(session.user()).toBeNull();
+    expect(await session.ensureLoaded()).toBeNull();
+    http.expectNone(ME);
+  });
+
+  it.each([
+    [
+      'the server fails',
+      (r: TestRequest) => r.flush(null, { status: 500, statusText: 'Server Error' }),
+    ],
+    ['the network is down', (r: TestRequest) => r.error(new ProgressEvent('error'))],
+  ])('keeps the session and reports the error when %s during sign-out', async (_case, fail) => {
+    const loaded = session.ensureLoaded();
+    http.expectOne(ME).flush(admin);
+    await loaded;
+
+    const signedOut = session.logout();
+    fail(http.expectOne(LOGOUT));
+
+    await expect(signedOut).rejects.toBeInstanceOf(HttpErrorResponse);
+    // The HttpOnly cookie is still valid, so the admin is still signed in.
     expect(session.user()).toEqual(admin);
   });
 

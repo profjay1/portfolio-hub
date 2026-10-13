@@ -35,6 +35,12 @@
   margin: 0;
 }
 
+/* Only this page confirms a completed action this way, so the rule lives here rather than in admin-shared.css. */
+.notice-success {
+  margin: 0;
+  color: var(--color-success);
+}
+
 .field {
   display: grid;
   gap: var(--space-1);

@@ -58,6 +58,16 @@ export class AuthSession {
     return user;
   }
 
+  /**
+   * Signs out. The session cookie is HttpOnly, so only the server can remove it: the user is forgotten only once the
+   * server confirms (204). If the request fails, the cookie is still valid, so the session is kept and the error
+   * reaches the caller; pretending to be signed out would leave a working session behind a signed-out screen.
+   */
+  async logout(): Promise<void> {
+    await firstValueFrom(this.http.post<void>(`${AUTH_URL}/logout`, null));
+    this.clear();
+  }
+
   /** Forgets the user locally, for when the server has said the session is gone. */
   clear(): void {
     this.current.set(null);

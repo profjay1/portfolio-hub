@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, PendingTasks, inject, input, signal } from '@angular/core';
+import { Component, PendingTasks, computed, inject, input, signal } from '@angular/core';
 import {
   FormField,
   ReadonlyFieldTree,
@@ -64,10 +64,20 @@ export class AdminLogin {
 
   /** Bound from the ?returnUrl= query parameter (withComponentInputBinding); set by the guard when it redirects here. */
   readonly returnUrl = input<string>();
+  /** Bound from ?signedOut=1, which AdminLayout adds after a successful sign-out. */
+  readonly signedOut = input<string>();
 
   private readonly model = signal<LoginFormModel>(EMPTY);
   /** A fixed root name, so the controls render as name="login.email" and name="login.password" (see Contact). */
   protected readonly form = form(this.model, loginSchema, { name: 'login' });
+
+  /**
+   * Stays while the admin is on this page; a successful sign-in navigates away. Hidden while a sign-in error shows,
+   * so the page never says "You've signed out" and "The email or password is incorrect" at once.
+   */
+  protected readonly showSignedOut = computed(
+    () => !!this.signedOut() && this.form().errors().length === 0,
+  );
 
   /** Server field names mapped to the controls that show their errors (see ProjectForm for why a Map). */
   private readonly fieldsByServerName: ReadonlyMap<string, ReadonlyFieldTree<unknown>> = new Map<
