@@ -33,6 +33,9 @@ src/app
 - `npm --prefix frontend ci` / `start` / `run lint` / `run test:ci` / `run build`
 - `npm --prefix frontend run e2e` (first time: `npx --prefix frontend playwright install chromium`). Starts its own dev server and stubs the API.
 - `npm --prefix frontend run format` rewrites files with Prettier; `lint` only checks.
+- `npm --prefix frontend run e2e:stack` runs the stack smoke tests (`e2e/stack/`) against a running stack, with no
+  API stubs. Opt-in: start the Compose stack first and export `HUB_ADMIN_EMAIL` / `HUB_ADMIN_PASSWORD` (the
+  credentials it was started with); `HUB_STACK_URL` overrides the default http://localhost:8081.
 
 ## Running locally
 Two terminals: the backend on :8080 (see backend/CLAUDE.md), then `npm --prefix frontend start` on :4200.

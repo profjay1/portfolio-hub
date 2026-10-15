@@ -4,6 +4,8 @@ const port = 4200;
 
 export default defineConfig({
   testDir: './e2e',
+  // Stack smoke tests need a running Docker stack; they have their own config (npm run e2e:stack).
+  testIgnore: ['stack/**'],
   fullyParallel: true,
   forbidOnly: !!process.env['CI'],
   retries: process.env['CI'] ? 2 : 0,
