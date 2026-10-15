@@ -1,0 +1,7 @@
+# Allowlist: send only what the build needs, so local files (.env, uploads, target/, IDE settings) never reach
+# the build context or an image layer.
+*
+!.mvn/
+!mvnw
+!pom.xml
+!src/main/
