@@ -1,0 +1,11 @@
+# Allowlist: send only what the build needs, so node_modules, dist/, test output and local config never reach
+# the build context or an image layer.
+*
+!package.json
+!package-lock.json
+!angular.json
+!tsconfig.json
+!tsconfig.app.json
+!public/
+!src/
+!nginx/
