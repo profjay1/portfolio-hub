@@ -24,7 +24,8 @@ Optimise for correctness, clarity, testability, operability, and being explainab
 ## Commands (some appear only after M1, the walking skeleton; see backend/ and frontend/ CLAUDE.md)
 - Backend build + tests: `backend/mvnw -f backend/pom.xml verify`
 - Frontend: `npm --prefix frontend run lint | test:ci | build`
-- Full local stack: `docker compose -f infra/compose/compose.local.yml up -d`
+- Full local stack: `docker compose --env-file .env -f infra/compose/compose.local.yml up -d --build`, then http://localhost:8081
+  (`--env-file` is required: Compose otherwise looks for `.env` next to the compose file, not at the repo root)
 
 ## How we work (non-negotiable)
 1. **Plan before code.** For anything beyond a trivial edit, propose a short plan (files, tests, migrations, docs) and wait for approval.

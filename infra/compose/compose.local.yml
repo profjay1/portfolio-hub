@@ -1,0 +1,80 @@
+# Full local stack: PostgreSQL, backend and frontend, built from this checkout.
+#   docker compose --env-file .env -f infra/compose/compose.local.yml up -d --build
+# Values come from the repo-root .env (copied from .env.example). Every one is required (`:?`): a missing variable
+# stops Compose with a message instead of starting a half-configured stack.
+#
+# Only the frontend is published, on localhost:8081. It serves the SPA and proxies /api to the backend, so the
+# browser sees one origin, as in production. Open it as http://localhost:8081: browsers accept the Secure session
+# cookie on localhost over plain HTTP, but not on a LAN address.
+name: hub
+
+services:
+  db:
+    image: postgres:18.6-alpine3.24
+    # The image's postgres user (alpine UID/GID 70). Without this the entrypoint starts as root and only drops to
+    # postgres before launching the server, and `exec` opens a root shell. A new named volume inherits 70:70
+    # ownership from the image, so initdb works unprivileged.
+    user: "70:70"
+    environment:
+      POSTGRES_DB: hub
+      POSTGRES_USER: ${HUB_DB_USER:?set HUB_DB_USER in .env}
+      POSTGRES_PASSWORD: ${HUB_DB_PASSWORD:?set HUB_DB_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      # Over TCP on purpose: during first-time initialisation PostgreSQL listens only on its Unix socket, so a
+      # socket check would report ready before the init scripts have finished.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$$POSTGRES_USER\" -d hub"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+  backend:
+    build: ../../backend
+    image: hub-backend:local
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # An explicit list rather than env_file: the container gets only the variables the backend reads.
+      SPRING_PROFILES_ACTIVE: local
+      HUB_DB_URL: jdbc:postgresql://db:5432/hub
+      HUB_DB_USER: ${HUB_DB_USER:?set HUB_DB_USER in .env}
+      HUB_DB_PASSWORD: ${HUB_DB_PASSWORD:?set HUB_DB_PASSWORD in .env}
+      HUB_JWT_SECRET: ${HUB_JWT_SECRET:?set HUB_JWT_SECRET in .env}
+      HUB_ADMIN_EMAIL: ${HUB_ADMIN_EMAIL:?set HUB_ADMIN_EMAIL in .env}
+      HUB_ADMIN_PASSWORD: ${HUB_ADMIN_PASSWORD:?set HUB_ADMIN_PASSWORD in .env}
+      # Inside the container, not the host path from .env; the image creates it owned by the non-root user.
+      HUB_RESUME_STORAGE_PATH: /var/lib/hub/resume
+    volumes:
+      - resume-data:/var/lib/hub/resume
+    # Healthcheck (liveness) comes from the image.
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 768M
+
+  frontend:
+    build: ../../frontend
+    image: hub-frontend:local
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8081:8080"
+    # Healthcheck comes from the image.
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+
+volumes:
+  db-data:
+  resume-data:
