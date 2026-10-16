@@ -1,0 +1,34 @@
+---
+- name: Install ufw
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+
+# SSH is allowed before the firewall is enabled or defaults tightened, so no run can lock out its own session.
+# Rules match the server's existing ones exactly ("OpenSSH" app profile, 80/tcp, 443/tcp), so nothing is duplicated.
+- name: Allow SSH
+  community.general.ufw:
+    rule: allow
+    name: OpenSSH
+
+# Caddy needs 80 for the ACME HTTP challenge and the HTTP-to-HTTPS redirect; Caddy itself is configured in #12.
+- name: Allow HTTP and HTTPS
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop: ["80", "443"]
+
+- name: Deny incoming and allow outgoing traffic by default
+  community.general.ufw:
+    default: "{{ item.policy }}"
+    direction: "{{ item.direction }}"
+  loop:
+    - { direction: incoming, policy: deny }
+    - { direction: outgoing, policy: allow }
+  loop_control:
+    label: "{{ item.direction }}"
+
+- name: Enable the firewall
+  community.general.ufw:
+    state: enabled

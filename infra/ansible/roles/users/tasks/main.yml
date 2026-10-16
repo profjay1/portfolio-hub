@@ -1,0 +1,17 @@
+---
+# No password is set here: a password hash would be a secret in the repo. On a fresh server it is set once by hand
+# (docs/runbooks/rebuild-server.md); on an existing server the current password is left untouched.
+- name: Create the deploy user with sudo rights
+  ansible.builtin.user:
+    name: "{{ hub_deploy_user }}"
+    shell: /bin/bash
+    groups: [sudo]
+    append: true
+
+# Not exclusive: adds the managed key without removing any other key already authorised.
+- name: Authorise the deploy user's SSH public key
+  ansible.posix.authorized_key:
+    user: "{{ hub_deploy_user }}"
+    key: "{{ lookup('ansible.builtin.file', hub_deploy_ssh_public_key_file) }}"
+    state: present
+    exclusive: false

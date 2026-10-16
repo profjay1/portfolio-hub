@@ -1,0 +1,13 @@
+---
+# A drop-in rather than edits to sshd_config: sshd keeps the first value it reads for each keyword, and the
+# Include of sshd_config.d comes before the main file's own settings. A file that sorts before cloud-init's
+# 50-cloud-init.conf therefore wins over anything a fresh image ships with.
+- name: Install the SSH hardening drop-in
+  ansible.builtin.copy:
+    src: 10-hub-hardening.conf
+    dest: /etc/ssh/sshd_config.d/10-hub-hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Reload sshd

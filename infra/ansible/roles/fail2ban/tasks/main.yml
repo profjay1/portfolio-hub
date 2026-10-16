@@ -1,0 +1,14 @@
+---
+# The jail itself comes from the package: Debian's jail.d/defaults-debian.conf enables [sshd] with the nftables ban
+# action and the systemd journal backend, which is what the server runs today. No jail.local is added, so package
+# updates keep owning that file and there is no second copy of the configuration to drift.
+- name: Install fail2ban
+  ansible.builtin.apt:
+    name: fail2ban
+    state: present
+
+- name: Keep fail2ban enabled and running
+  ansible.builtin.systemd_service:
+    name: fail2ban
+    enabled: true
+    state: started
