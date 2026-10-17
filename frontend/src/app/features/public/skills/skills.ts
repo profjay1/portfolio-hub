@@ -16,7 +16,14 @@ export class Skills {
     {
       name: 'Backend',
       summary: 'Services that are modular, observable, and easy to change.',
-      skills: ['Java 21', 'Spring Boot', 'Spring Modulith', 'Spring Security', 'REST API design'],
+      skills: [
+        'Java 21',
+        'Spring Boot',
+        'Spring Modulith',
+        'Service boundaries and when to split them',
+        'Spring Security',
+        'REST API design',
+      ],
     },
     {
       name: 'Frontend',
@@ -31,7 +38,7 @@ export class Skills {
     {
       name: 'Delivery and operations',
       summary: 'Automated paths from commit to production.',
-      skills: ['Docker', 'GitHub Actions', 'Ansible', 'Terraform', 'Caddy', 'Linux'],
+      skills: ['Docker', 'nginx', 'GitHub Actions', 'Ansible', 'Terraform', 'Caddy', 'Linux'],
     },
     {
       name: 'Practices',
