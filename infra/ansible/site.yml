@@ -1,0 +1,26 @@
+---
+# Provisions and hardens the Hub VPS. Safe to re-run: a second run reports no changes.
+# Usage and the dry-run-first procedure: infra/CLAUDE.md. Caddy is configured separately (#12).
+
+- name: Check the controller environment
+  hosts: localhost
+  gather_facts: false
+  become: false
+  tasks:
+    - name: Require the host and public key inputs
+      ansible.builtin.assert:
+        that:
+          - lookup('ansible.builtin.env', 'HUB_VPS_HOST') | length > 0
+          - lookup('ansible.builtin.env', 'HUB_SSH_PUBLIC_KEY_FILE') | length > 0
+        fail_msg: Set HUB_VPS_HOST and HUB_SSH_PUBLIC_KEY_FILE (see infra/CLAUDE.md).
+        quiet: true
+
+- name: Provision the Hub VPS
+  hosts: hub
+  roles:
+    - base
+    - users
+    - ssh
+    - firewall
+    - fail2ban
+    - docker

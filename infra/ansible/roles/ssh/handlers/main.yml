@@ -1,0 +1,13 @@
+---
+# The drop-in was validated on its own when it was copied; this checks the full, combined configuration before the
+# reload, because a broken sshd config on a remote server can lock everyone out. A reload keeps open sessions.
+- name: Validate the full sshd configuration
+  ansible.builtin.command: /usr/sbin/sshd -t
+  changed_when: false
+  listen: Reload sshd
+
+- name: Reload the ssh service
+  ansible.builtin.systemd_service:
+    name: ssh
+    state: reloaded
+  listen: Reload sshd
