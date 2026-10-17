@@ -12,7 +12,7 @@
 ## Ansible: provisioning the VPS (`infra/ansible/`)
 - `site.yml` provisions and hardens the server: unattended upgrades, the `deploy` sudo user and its key, SSH (keys only,
   no root), ufw (OpenSSH, 80/tcp, 443/tcp), fail2ban (the package's sshd jail), Docker Engine with the Compose plugin.
-  It does **not** configure Caddy (#12) or the application stack (#13).
+  It does **not** configure Caddy (#12) or the application stack (#11).
 - One-time setup: `ansible-galaxy collection install -r infra/ansible/requirements.yml`.
 - Inputs come from the environment, never the repo: `HUB_VPS_HOST` (the server address) and `HUB_SSH_PUBLIC_KEY_FILE`
   (path to the deploy user's public key). The sudo password is prompted for by `-K` and never stored.
