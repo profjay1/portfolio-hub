@@ -1,7 +1,7 @@
 # Rebuild the server from scratch
 
 **When:** the VPS is lost, compromised, or has to move to a new host.
-**Result:** a fresh Ubuntu 24.04 server in the same hardened state as today, ready for Caddy (#12) and the deploy (#13).
+**Result:** a fresh Ubuntu 24.04 server in the same hardened state as today, ready for Caddy (#12) and the deploy (#11).
 **Last rehearsed:** not yet. The playbook was written against the live server, but a full rebuild on a throwaway
 droplet has not been performed. Record the date here when it is.
 
@@ -62,4 +62,4 @@ without `sudo`.
 ## 5. What comes next (not covered here)
 - Point DNS (`@` and `www`) at the new IP.
 - Install and configure Caddy (#12).
-- Deploy the application stack and restore data from backup (#13, #63).
+- Deploy the application stack and restore data from backup (#11, #63).
