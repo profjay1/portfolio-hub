@@ -189,8 +189,11 @@ code {
   border-radius: var(--radius-sm);
   background: var(--color-surface);
   color: var(--color-text);
+  /* <button> doesn't inherit the page font, so form buttons would otherwise render in the browser default. */
+  font: inherit;
   font-weight: 500;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .button:hover {
