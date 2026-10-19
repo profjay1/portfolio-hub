@@ -100,6 +100,10 @@
   margin: 0;
 }
 
+.footer-inner a {
+  white-space: nowrap;
+}
+
 @media (min-width: 48rem) {
   .header-inner {
     flex-direction: row;
