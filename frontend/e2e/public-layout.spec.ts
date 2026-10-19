@@ -24,3 +24,31 @@ test('gives form buttons the same font as link buttons', async ({ page }) => {
   expect(formButton).toEqual(linkButton);
   expect(formButton.size).toBe('16px');
 });
+
+for (const width of [320, 390]) {
+  test(`shows every nav link without sideways scrolling at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto('/');
+    const list = page.getByRole('navigation', { name: 'Primary' }).getByRole('list');
+    await expect(list.getByRole('link')).toHaveCount(6);
+
+    const fit = await list.evaluate((ul) => {
+      const box = ul.getBoundingClientRect();
+      const left = Math.max(0, box.left);
+      const right = Math.min(window.innerWidth, box.right);
+      const clipped = [...ul.querySelectorAll('a')]
+        .filter((a) => {
+          const r = a.getBoundingClientRect();
+          return r.left < left || r.right > right;
+        })
+        .map((a) => a.textContent?.trim());
+      return {
+        clipped,
+        listOverflow: ul.scrollWidth - ul.clientWidth,
+        pageOverflow: document.documentElement.scrollWidth - window.innerWidth,
+      };
+    });
+
+    expect(fit).toEqual({ clipped: [], listOverflow: 0, pageOverflow: 0 });
+  });
+}
