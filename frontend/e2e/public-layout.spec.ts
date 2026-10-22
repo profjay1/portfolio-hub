@@ -52,3 +52,13 @@ for (const width of [320, 390]) {
     expect(fit).toEqual({ clipped: [], listOverflow: 0, pageOverflow: 0 });
   });
 }
+
+test('serves its own SVG favicon from the page head', async ({ page, request }) => {
+  await page.goto('/');
+  const href = await page.locator('link[rel="icon"]').getAttribute('href');
+  expect(href).toBe('favicon-v1.svg');
+
+  const icon = await request.get('/favicon-v1.svg');
+  expect(icon.status()).toBe(200);
+  expect(icon.headers()['content-type']).toContain('image/svg+xml');
+});

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    rect { fill: #1b1c1d; }
+    text { fill: #f7f6f2; }
+    @media (prefers-color-scheme: dark) {
+      rect { fill: #ebeae6; }
+      text { fill: #111315; }
+    }
+  </style>
+  <rect width="32" height="32" rx="6" />
+  <text x="16" y="16" dominant-baseline="central" text-anchor="middle"
+        font-family="ui-monospace, Menlo, Consolas, monospace" font-size="14" font-weight="600">SO</text>
+</svg>
