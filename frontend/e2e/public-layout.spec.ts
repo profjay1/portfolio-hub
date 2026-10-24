@@ -62,3 +62,39 @@ test('serves its own SVG favicon from the page head', async ({ page, request }) 
   expect(icon.status()).toBe(200);
   expect(icon.headers()['content-type']).toContain('image/svg+xml');
 });
+
+for (const width of [320, 390, 1440]) {
+  test(`keeps skill tags readable and inside their cards at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/skills');
+    const tags = page.locator('.tags li');
+    await expect(tags.first()).toBeVisible();
+
+    const bodyFont = await font(page.locator('body'));
+    const tagFonts = await tags.evaluateAll((items) => [
+      ...new Set(
+        items.map((li) => {
+          const style = getComputedStyle(li);
+          return `${style.fontFamily} ${style.fontSize}`;
+        }),
+      ),
+    ]);
+    expect(tagFonts).toEqual([`${bodyFont.family} 14px`]);
+
+    const fit = await tags.evaluateAll((items) => ({
+      overflowing: items
+        .filter((li) => {
+          const card = li.closest('.card');
+          if (!card) {
+            return true;
+          }
+          const contentRight =
+            card.getBoundingClientRect().right - parseFloat(getComputedStyle(card).paddingRight);
+          return li.getBoundingClientRect().right > contentRight;
+        })
+        .map((li) => li.textContent?.trim()),
+      pageOverflow: document.documentElement.scrollWidth - window.innerWidth,
+    }));
+    expect(fit).toEqual({ overflowing: [], pageOverflow: 0 });
+  });
+}
