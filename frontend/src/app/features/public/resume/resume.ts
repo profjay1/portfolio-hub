@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 /**
  * A plain link rather than an HTTP call: the browser streams the PDF straight to disk and names it from the
@@ -7,6 +8,7 @@ import { Component } from '@angular/core';
  */
 @Component({
   selector: 'app-resume',
+  imports: [RouterLink],
   templateUrl: './resume.html',
   styleUrl: './resume.css',
 })
