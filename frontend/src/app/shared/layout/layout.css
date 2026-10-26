@@ -13,7 +13,7 @@
   border-block-end: 1px solid var(--color-border);
 }
 
-/* Mobile first: brand on one row, nav scrolls sideways underneath instead of hiding behind a menu button. */
+/* Mobile first: brand on one row, nav underneath in two rows of three instead of hiding behind a menu button. */
 .header-inner {
   display: flex;
   flex-direction: column;
@@ -44,13 +44,13 @@
 }
 
 .site-nav ul {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  justify-items: start;
   gap: var(--space-1);
   margin: 0;
   padding: 0;
   list-style: none;
-  overflow-x: auto;
-  scrollbar-width: none;
 }
 
 .site-nav a {
@@ -100,12 +100,21 @@
   margin: 0;
 }
 
+.footer-inner a {
+  white-space: nowrap;
+}
+
 @media (min-width: 48rem) {
   .header-inner {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     padding-block: var(--space-3);
+  }
+
+  .site-nav ul {
+    display: flex;
+    flex-wrap: wrap;
   }
 
   .footer-inner {

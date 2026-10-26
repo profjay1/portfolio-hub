@@ -1,9 +1,15 @@
 <section class="page-intro">
   <p class="eyebrow">Experience</p>
   <h1>Resume</h1>
-  <p class="lede">My experience, skills and education in one page, ready to share.</p>
+  <p class="lede">
+    My experience, projects, skills and education, as a PDF you can save or forward.
+  </p>
 </section>
 
-<a class="button button-primary download" [href]="downloadUrl" download>
-  Download resume <span class="muted-label">(PDF)</span>
-</a>
+<div class="actions">
+  <a class="button button-primary download" [href]="downloadUrl" download>
+    Download resume <span class="muted-label">(PDF)</span>
+  </a>
+  <a class="button" routerLink="/contact">Get in touch</a>
+</div>
+<p class="muted follow-up">Rather talk it through first? Send a message and I'll reply by email.</p>

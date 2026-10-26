@@ -33,4 +33,19 @@ describe('Layout', () => {
     expect(host.querySelector('a.skip-link')?.getAttribute('href')).toBe('#main');
     expect(host.querySelector('main#main')).not.toBeNull();
   });
+
+  it('links the footer to the source code and to LinkedIn, opening in the same tab', async () => {
+    const host = await render();
+
+    const links = Array.from(host.querySelectorAll<HTMLAnchorElement>('footer a')).map((a) => [
+      a.textContent?.trim(),
+      a.getAttribute('href'),
+      a.getAttribute('target'),
+    ]);
+
+    expect(links).toEqual([
+      ['Source on GitHub', 'https://github.com/profjay1/portfolio-hub', null],
+      ['LinkedIn', 'https://www.linkedin.com/in/saheed-omotola-740b2b226', null],
+    ]);
+  });
 });
