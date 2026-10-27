@@ -1,6 +1,6 @@
 # 0007. Keep Caddy on the host, managed by Ansible, in front of the Compose stack
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-26
 - **Deciders:** Repository owner
 
