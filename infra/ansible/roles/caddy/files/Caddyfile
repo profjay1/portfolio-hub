@@ -1,0 +1,4 @@
+saheetech.xyz, www.saheetech.xyz {
+    root * /var/www/saheetech
+    file_server
+}
