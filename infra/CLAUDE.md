@@ -11,8 +11,10 @@
 
 ## Ansible: provisioning the VPS (`infra/ansible/`)
 - `site.yml` provisions and hardens the server: unattended upgrades, the `deploy` sudo user and its key, SSH (keys only,
-  no root), ufw (OpenSSH, 80/tcp, 443/tcp), fail2ban (the package's sshd jail), Docker Engine with the Compose plugin.
-  It does **not** configure Caddy (#12) or the application stack (#11).
+  no root), ufw (OpenSSH, 80/tcp, 443/tcp), fail2ban (the package's sshd jail), Docker Engine with the Compose plugin,
+  and Caddy on the host (ADR 0007): Caddy's apt repository and key, the package, the service, `/etc/caddy/Caddyfile`
+  and the holding page. It does **not** deploy the application stack (#11).
+- A Caddyfile change is checked with `caddy validate` before it replaces the live file, then applied with a reload.
 - One-time setup: `ansible-galaxy collection install -r infra/ansible/requirements.yml`.
 - Inputs come from the environment, never the repo: `HUB_VPS_HOST` (the server address) and `HUB_SSH_PUBLIC_KEY_FILE`
   (path to the deploy user's public key). The sudo password is prompted for by `-K` and never stored.
@@ -21,7 +23,9 @@
   2. Apply only after the owner has approved that dry run: `ansible-playbook site.yml --diff -K`, with a second SSH
      session open to the server until it finishes (the ssh and firewall roles can lock you out if they are wrong).
   3. Run again: the recap must show `changed=0`. Anything else is an idempotency bug to fix before merging.
-- Package upgrades are opt-in: `ansible-playbook site.yml --tags upgrade -K`.
+- Package upgrades are opt-in: `ansible-playbook site.yml --tags upgrade -K`. unattended-upgrades only takes Ubuntu's
+  own release, security and ESM archives, so **Caddy and Docker are never upgraded automatically**: they move only
+  with this tag (or apt by hand). Neither is version-pinned.
 - **Claude never runs the playbook against the real server, not even `--check`, without the owner's approval for that
   specific run.** Locally, run `ansible-playbook site.yml --syntax-check` and `ansible-lint` freely.
 - Docker writes its own iptables rules, so ports it publishes **bypass ufw**. Production containers publish to

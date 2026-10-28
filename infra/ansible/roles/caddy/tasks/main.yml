@@ -1,0 +1,67 @@
+---
+# Reproduces Caddy's documented Debian install (caddyserver.com/docs/install) and the hand-made setup of 2026-09-30:
+# the same keyring, .list file, Caddyfile and holding page, byte for byte, so a run against the live server finds
+# nothing to change (ADR 0007).
+
+# Caddy's published key (fingerprint 6576 0C51 EDEA 2017 CEA2 CA15 155B 6D79 CA56 EA34) in de-armoured form, as
+# Caddy's install steps write it. Committed rather than downloaded: get_url can't de-armour, and copy compares
+# checksums, so a changed key in the repo shows up in review and in the dry run.
+- name: Install Caddy's apt signing key
+  ansible.builtin.copy:
+    src: caddy-stable-archive-keyring.gpg
+    dest: /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+    owner: root
+    group: root
+    mode: "0644"
+
+# Caddy's published debian.deb.txt, unchanged.
+- name: Add Caddy's apt repository
+  ansible.builtin.copy:
+    src: caddy-stable.list
+    dest: /etc/apt/sources.list.d/caddy-stable.list
+    owner: root
+    group: root
+    mode: "0644"
+  register: caddy_apt_source
+
+# Not version-pinned: "present" never upgrades, and unattended-upgrades does not take this repository (its origin is
+# cloudsmith/caddy/stable), so Caddy moves only when someone runs the opt-in "upgrade" tag (base role).
+- name: Install Caddy
+  ansible.builtin.apt:
+    name: caddy
+    state: present
+    update_cache: "{{ caddy_apt_source is changed }}"
+
+- name: Keep Caddy enabled and running
+  ansible.builtin.systemd_service:
+    name: caddy
+    enabled: true
+    state: started
+
+# The holding page the Caddyfile serves until the first deploy switches it to reverse_proxy; both go then.
+- name: Create the holding page directory
+  ansible.builtin.file:
+    path: /var/www/saheetech
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the holding page
+  ansible.builtin.copy:
+    src: index.html
+    dest: /var/www/saheetech/index.html
+    owner: root
+    group: root
+    mode: "0644"
+
+# Validated before it replaces the live file, so a broken Caddyfile never reaches the server.
+- name: Install the Caddyfile
+  ansible.builtin.copy:
+    src: Caddyfile
+    dest: /etc/caddy/Caddyfile
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/bin/caddy validate --adapter caddyfile --config %s
+  notify: Reload Caddy

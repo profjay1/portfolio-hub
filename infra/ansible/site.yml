@@ -1,6 +1,6 @@
 ---
 # Provisions and hardens the Hub VPS. Safe to re-run: a second run reports no changes.
-# Usage and the dry-run-first procedure: infra/CLAUDE.md. Caddy is configured separately (#12).
+# Usage and the dry-run-first procedure: infra/CLAUDE.md. Caddy runs on the host, managed here (ADR 0007).
 
 - name: Check the controller environment
   hosts: localhost
@@ -24,3 +24,4 @@
     - firewall
     - fail2ban
     - docker
+    - caddy

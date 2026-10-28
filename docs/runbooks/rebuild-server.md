@@ -1,7 +1,8 @@
 # Rebuild the server from scratch
 
 **When:** the VPS is lost, compromised, or has to move to a new host.
-**Result:** a fresh Ubuntu 24.04 server in the same hardened state as today, ready for Caddy (#12) and the deploy (#11).
+**Result:** a fresh Ubuntu 24.04 server in the same hardened state as today, with Caddy serving the holding page over
+HTTPS, ready for the deploy (#11).
 **Last rehearsed:** not yet. The playbook was written against the live server, but a full rebuild on a throwaway
 droplet has not been performed. Record the date here when it is.
 
@@ -15,6 +16,10 @@ droplet has not been performed. Record the date here when it is.
 1. DigitalOcean: create a droplet, Ubuntu 24.04 LTS, with your SSH key selected for authentication.
 2. Note the new IP address.
 3. If you have connected to that IP before, remove the old host key: `ssh-keygen -R <new-ip>`.
+4. Point DNS (`@` and `www` for `saheetech.xyz`) at the new IP, and wait until `dig +short saheetech.xyz` and
+   `dig +short www.saheetech.xyz` both return it. Caddy requests its certificates as soon as the playbook starts it,
+   and Let's Encrypt can only issue them once the names resolve to this server. If DNS is late, Caddy keeps retrying,
+   but the site has no valid certificate until it succeeds.
 
 ## 2. Bootstrap the deploy user (manual, once)
 A fresh droplet only has `root`. The playbook runs as `deploy` and does not set passwords (a password hash in the repo
@@ -44,8 +49,8 @@ ansible-playbook site.yml --diff -K           # apply; keep a second SSH session
 ansible-playbook site.yml --diff -K           # must end with changed=0
 ```
 
-On a fresh server the dry run may fail at the Docker package task, because the Docker repository it depends on is only
-added for real in the apply. That is expected; the apply does not have this problem.
+On a fresh server the dry run may fail at the Docker or Caddy package task, because the apt repository each depends on
+is only added for real in the apply. That is expected; the apply does not have this problem.
 
 ## 4. Verify
 ```bash
@@ -53,13 +58,16 @@ ssh root@<new-ip>                     # must be refused: Permission denied (publ
 ssh deploy@<new-ip> 'sudo sshd -T | grep -E "^(permitrootlogin|passwordauthentication|kbdinteractiveauthentication|pubkeyauthentication) "'
 ssh deploy@<new-ip> 'sudo ufw status verbose; sudo fail2ban-client status sshd'
 ssh deploy@<new-ip> 'docker run --rm hello-world && docker compose version'
+ssh deploy@<new-ip> 'systemctl is-active caddy'
+curl -I http://saheetech.xyz          # 308 Permanent Redirect to https://saheetech.xyz/
+curl -I https://saheetech.xyz         # 200, server: Caddy
+curl -I https://www.saheetech.xyz     # 200, server: Caddy
 ```
 
 Expected: `permitrootlogin no`, `passwordauthentication no`, `kbdinteractiveauthentication no`,
 `pubkeyauthentication yes`; ufw active with OpenSSH, 80/tcp and 443/tcp allowed; the sshd jail listed; Docker runs
-without `sudo`.
+without `sudo`; Caddy `active`, redirecting HTTP to HTTPS and serving the holding page on both names with a valid
+certificate (curl fails with a certificate error otherwise).
 
 ## 5. What comes next (not covered here)
-- Point DNS (`@` and `www`) at the new IP.
-- Install and configure Caddy (#12).
 - Deploy the application stack and restore data from backup (#11, #63).

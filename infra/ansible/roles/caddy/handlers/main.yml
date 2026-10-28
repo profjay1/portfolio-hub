@@ -1,0 +1,7 @@
+---
+# A reload applies the new Caddyfile through Caddy's admin API without restarting the process, so open connections
+# and the certificates in memory are kept.
+- name: Reload Caddy
+  ansible.builtin.systemd_service:
+    name: caddy
+    state: reloaded
