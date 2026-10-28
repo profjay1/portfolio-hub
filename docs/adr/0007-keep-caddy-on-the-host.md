@@ -33,6 +33,9 @@ A read-only inspection of the droplet on 2026-10-26 found that Caddy is already 
   configuration is drift: it exists only on the server.
 - Docker on the droplet is clean: no containers apart from an exited `hello-world`, no volumes and no Compose projects.
   Nothing from this repository is deployed yet.
+- Checked on 2026-10-27, with `sudo` run by the owner: the package comes from Caddy's official apt repository
+  (`/etc/apt/sources.list.d/caddy-stable.list`, signed by `/usr/share/keyrings/caddy-stable-archive-keyring.gpg`);
+  Caddy's journal has no warnings or errors since setup; ufw allows only OpenSSH, 80/tcp and 443/tcp.
 
 The repository already assumes something outside Compose terminates TLS. `infra/CLAUDE.md` says production containers
 publish to `127.0.0.1` only and Caddy is the only public entry point, because ports Docker publishes bypass ufw. The
@@ -71,12 +74,13 @@ production)".
   - The network rules stay simple: ufw opens 80 and 443 to Caddy, and nothing published by Docker is reachable from
     outside.
 - **Negative / costs / risks:**
-  - Two update paths: the Caddy package is upgraded through apt (unattended-upgrades or the playbook's
-    `--tags upgrade`), while the app images are upgraded through deploys. A Caddy upgrade is not tested in CI.
+  - Two update paths: the app images are upgraded through deploys, and the Caddy package through apt.
+    unattended-upgrades does not upgrade Caddy: its allowed origins are Ubuntu's own release, security and ESM
+    archives, and Caddy's repository identifies itself as `cloudsmith/caddy/stable`. Caddy is upgraded only when
+    someone runs the playbook's `--tags upgrade` (or apt by hand), so it falls behind otherwise: on 2026-10-27 the
+    server ran 2.11.4 while 2.11.7 was available. A Caddy upgrade is not tested in CI.
   - Caddy cannot use Docker service names, so the frontend's loopback port is a contract between the Compose file and
     the Caddyfile and must be kept in step.
-  - Not yet checked, because it needs `sudo`: which apt source the package came from, Caddy's journal and the live
-    ufw rules. The role has to confirm these before it can match the server.
 - **Follow-ups this creates:**
   - **Security headers** in the Caddyfile (#12, #62). None are sent today.
   - **Forwarded-header trust on the backend.** Behind Caddy and the frontend's nginx, the backend must trust
