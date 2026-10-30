@@ -1,4 +1,23 @@
+# Security headers for every response from the site. They live in a snippet so that switching from file_server to
+# reverse_proxy at the first deploy (#11) only replaces the handler lines in the site block.
+#
+# Strict-Transport-Security is 1 day while no certificate renewal has been seen on this server (the first is due
+# around late November 2026); raise it to max-age=31536000 once one has worked. No includeSubDomains or preload: they
+# would force HTTPS on every future subdomain, including AWS-hosted projects (ADR 0004), and preload is slow to undo.
+# Frame protection is X-Frame-Options for now; frame-ancestors comes with the Content Security Policy (#62).
+# If an upstream ever sends any of these headers too, add `defer` so these values replace its copies.
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=86400"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "DENY"
+		Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+	}
+}
+
 saheetech.xyz, www.saheetech.xyz {
-    root * /var/www/saheetech
-    file_server
+	import security_headers
+	root * /var/www/saheetech
+	file_server
 }
