@@ -14,7 +14,12 @@
   no root), ufw (OpenSSH, 80/tcp, 443/tcp), fail2ban (the package's sshd jail), Docker Engine with the Compose plugin,
   and Caddy on the host (ADR 0007): Caddy's apt repository and key, the package, the service, `/etc/caddy/Caddyfile`
   and the holding page. It does **not** deploy the application stack (#11).
-- A Caddyfile change is checked with `caddy validate` before it replaces the live file, then applied with a reload.
+- Additional static sites (ADR 0008): one root-owned file per site in `/etc/caddy/sites/`, from
+  `roles/caddy/files/sites/`, imported by the main Caddyfile. Each site defines its own headers. Its web root
+  (`/var/www/<site>`) belongs to the deploy user; its content is deployed from that site's own repository.
+- A Caddyfile or site file change is checked with `caddy validate` before it replaces the live file, then applied with
+  a reload. A site file validated on its own only shows syntax errors in that file; a clash between sites shows up when
+  the main Caddyfile is validated or when Caddy reloads.
 - One-time setup: `ansible-galaxy collection install -r infra/ansible/requirements.yml`.
 - Inputs come from the environment, never the repo: `HUB_VPS_HOST` (the server address) and `HUB_SSH_PUBLIC_KEY_FILE`
   (path to the deploy user's public key). The sudo password is prompted for by `-K` and never stored.

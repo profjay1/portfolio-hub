@@ -1,0 +1,28 @@
+zoradox.com {
+	root * /var/www/zoradox
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=86400"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "DENY"
+		Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+	}
+
+	@fonts path /assets/fonts/*
+	header @fonts Cache-Control "public, max-age=2592000"
+
+	@notfonts not path /assets/fonts/*
+	header @notfonts Cache-Control "no-cache"
+
+	handle_errors {
+		rewrite * /404.html
+		file_server
+	}
+	file_server
+}
+
+www.zoradox.com {
+	redir https://zoradox.com{uri} permanent
+}
