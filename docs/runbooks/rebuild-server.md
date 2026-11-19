@@ -2,7 +2,7 @@
 
 **When:** the VPS is lost, compromised, or has to move to a new host.
 **Result:** a fresh Ubuntu 24.04 server in the same hardened state as today, with Caddy serving the holding page over
-HTTPS, ready for the deploy (#11).
+HTTPS and an empty zoradox.com site (ADR 0008), ready for the deploys (#11, and zoradox's own).
 **Last rehearsed:** not yet. The playbook was written against the live server, but a full rebuild on a throwaway
 droplet has not been performed. Record the date here when it is.
 
@@ -16,10 +16,11 @@ droplet has not been performed. Record the date here when it is.
 1. DigitalOcean: create a droplet, Ubuntu 24.04 LTS, with your SSH key selected for authentication.
 2. Note the new IP address.
 3. If you have connected to that IP before, remove the old host key: `ssh-keygen -R <new-ip>`.
-4. Point DNS (`@` and `www` for `saheetech.xyz`) at the new IP, and wait until `dig +short saheetech.xyz` and
-   `dig +short www.saheetech.xyz` both return it. Caddy requests its certificates as soon as the playbook starts it,
-   and Let's Encrypt can only issue them once the names resolve to this server. If DNS is late, Caddy keeps retrying,
-   but the site has no valid certificate until it succeeds.
+4. Point DNS (`@` and `www` for both `saheetech.xyz` and `zoradox.com`) at the new IP, and wait until
+   `dig +short saheetech.xyz`, `dig +short www.saheetech.xyz`, `dig +short zoradox.com` and
+   `dig +short www.zoradox.com` all return it. Caddy requests its certificates as soon as the playbook gives it its
+   configuration, and Let's Encrypt can only issue them once the names resolve to this server. If DNS is late, Caddy
+   keeps retrying, but the site has no valid certificate until it succeeds.
 
 ## 2. Bootstrap the deploy user (manual, once)
 A fresh droplet only has `root`. The playbook runs as `deploy` and does not set passwords (a password hash in the repo
@@ -52,6 +53,15 @@ ansible-playbook site.yml --diff -K           # must end with changed=0
 On a fresh server the dry run may fail at the Docker or Caddy package task, because the apt repository each depends on
 is only added for real in the apply. That is expected; the apply does not have this problem.
 
+The apply reloads Caddy once, at the end of the play (a reload, not a restart), and Caddy requests the certificates for
+all four names at that reload. Watch for them in your own terminal on the server:
+
+```bash
+sudo journalctl -u caddy --since "15 min ago" | grep -iE 'certificate obtained|obtaining|error'
+```
+
+Each name should log `certificate obtained successfully`. Remove visitor IP addresses from anything you paste.
+
 ## 4. Verify
 ```bash
 ssh root@<new-ip>                     # must be refused: Permission denied (publickey)
@@ -68,6 +78,20 @@ Expected: `permitrootlogin no`, `passwordauthentication no`, `kbdinteractiveauth
 `pubkeyauthentication yes`; ufw active with OpenSSH, 80/tcp and 443/tcp allowed; the sshd jail listed; Docker runs
 without `sudo`; Caddy `active`, redirecting HTTP to HTTPS and serving the holding page on both names with a valid
 certificate (curl fails with a certificate error otherwise).
+
+zoradox.com's web root stays empty until zoradox's own deploy fills it. Until then:
+
+```bash
+curl -I https://zoradox.com           # 404 with zoradox's five security headers (curl -i shows an empty body)
+```
+
+After zoradox's first deploy:
+
+```bash
+curl -I https://zoradox.com           # 200, cache-control: no-cache
+curl -I https://www.zoradox.com       # 301, location: https://zoradox.com/
+curl -I https://zoradox.com/no-such-page   # 404, served from zoradox's 404.html
+```
 
 ## 5. What comes next (not covered here)
 - Deploy the application stack and restore data from backup (#11, #63).

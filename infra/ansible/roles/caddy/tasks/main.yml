@@ -55,6 +55,36 @@
     group: root
     mode: "0644"
 
+# Additional static sites (ADR 0008). Root-owned, so only Ansible changes them; the main Caddyfile imports them.
+- name: Create the sites directory
+  ansible.builtin.file:
+    path: /etc/caddy/sites
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+# Validated on its own, which catches syntax errors in this file. A clash with another site is only caught when the
+# main Caddyfile is validated (it imports this directory) or when Caddy reloads.
+- name: Install the zoradox.com site
+  ansible.builtin.copy:
+    src: sites/zoradox.caddy
+    dest: /etc/caddy/sites/zoradox.caddy
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/bin/caddy validate --adapter caddyfile --config %s
+  notify: Reload Caddy
+
+# Empty until zoradox's own deploy rsyncs its static files here as the deploy user.
+- name: Create the zoradox.com web root
+  ansible.builtin.file:
+    path: /var/www/zoradox
+    state: directory
+    owner: "{{ hub_deploy_user }}"
+    group: "{{ hub_deploy_user }}"
+    mode: "0755"
+
 # Validated before it replaces the live file, so a broken Caddyfile never reaches the server.
 - name: Install the Caddyfile
   ansible.builtin.copy:
