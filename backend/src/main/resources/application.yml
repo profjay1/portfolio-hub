@@ -54,10 +54,21 @@ spring:
 
 ---
 # Production: one JSON object per line (Elastic Common Schema) so logs can be shipped and queried by field.
+# Same database mapping as local, with no fallback values: a missing variable fails startup.
 spring:
   config:
     activate:
       on-profile: prod
+  datasource:
+    url: ${HUB_DB_URL}
+    username: ${HUB_DB_USER}
+    password: ${HUB_DB_PASSWORD}
+server:
+  # Requests arrive as Caddy -> frontend nginx -> backend. Caddy sets X-Forwarded-For and X-Forwarded-Proto (replacing
+  # anything the client sent) and nginx passes them through unchanged. Tomcat applies them only when the direct peer is
+  # a private-range address, its default internal proxies. That is safe here because the backend is reachable only from
+  # the internal Docker network and the frontend is published on loopback only, so no client can reach Tomcat directly.
+  forward-headers-strategy: native
 logging:
   structured:
     format:
