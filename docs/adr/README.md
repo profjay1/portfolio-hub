@@ -13,5 +13,6 @@ if a decision changes, add a new ADR that supersedes it and mark the old one `Su
 | [0006](0006-jwt-in-httponly-cookie-with-csrf-tokens.md) | Carry the session JWT in an HttpOnly cookie, with CSRF tokens | Accepted |
 | [0007](0007-keep-caddy-on-the-host.md) | Keep Caddy on the host, managed by Ansible, in front of the Compose stack | Accepted |
 | [0008](0008-host-additional-static-sites.md) | Host additional static sites via /etc/caddy/sites/ | Accepted |
+| [0009](0009-server-side-env-until-sops.md) | Keep production secrets in a server-side .env until SOPS is in place | Accepted |
 
 Create new ones with the `/adr` Claude Code skill or by copying [0000-template.md](0000-template.md).
