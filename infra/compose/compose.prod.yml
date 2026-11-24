@@ -1,0 +1,112 @@
+# Production stack: PostgreSQL, backend and frontend from pre-built images. Never built on the server.
+# On the server it lives in ~/hub/ next to the .env that holds the secrets (ADR 0009); Compose reads that .env only to
+# fill in the variables below. The deploy sets HUB_IMAGE_TAG to the release's commit sha:
+#   HUB_IMAGE_TAG=<sha> docker compose -f compose.prod.yml up -d --wait
+#
+# Only the frontend is published, on the host's loopback interface: Caddy on the host proxies to it, and nothing outside
+# the host can reach it directly. The backend and database sit on an internal network with no route out, which is what
+# makes the backend's forwarded-header trust safe (application.yml, prod profile).
+#
+# Sized for a 3.8 GiB droplet without swap: about 1.65 GiB of limits in total, leaving room for Caddy, Docker and OS.
+name: hub
+
+# Docker keeps container logs forever by default; three 10 MB files per container caps them.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: postgres:18.6-alpine3.24
+    # The image's postgres user (alpine UID/GID 70), as in compose.local.yml.
+    user: "70:70"
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      # The runbook's `docker compose exec db psql -U <db-user> -d hub` relies on this name.
+      POSTGRES_DB: hub
+      # Applied only when the data volume is first initialised (docs/runbooks/production-secrets.md).
+      POSTGRES_USER: ${HUB_DB_USER:?set HUB_DB_USER in ~/hub/.env (ADR 0009)}
+      POSTGRES_PASSWORD: ${HUB_DB_PASSWORD:?set HUB_DB_PASSWORD in ~/hub/.env (ADR 0009)}
+    volumes:
+      - db-data:/var/lib/postgresql
+    networks:
+      - internal
+    healthcheck:
+      # Over TCP on purpose, as in compose.local.yml: during first-time initialisation PostgreSQL listens only on its
+      # Unix socket, so a socket check would report ready too early.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$$POSTGRES_USER\" -d hub"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+  backend:
+    image: hub-backend:${HUB_IMAGE_TAG:?set HUB_IMAGE_TAG to the release's commit sha}
+    restart: unless-stopped
+    logging: *logging
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # An explicit list rather than env_file: the container gets only the variables the backend reads.
+      SPRING_PROFILES_ACTIVE: prod
+      HUB_DB_URL: jdbc:postgresql://db:5432/hub
+      HUB_DB_USER: ${HUB_DB_USER:?set HUB_DB_USER in ~/hub/.env (ADR 0009)}
+      HUB_DB_PASSWORD: ${HUB_DB_PASSWORD:?set HUB_DB_PASSWORD in ~/hub/.env (ADR 0009)}
+      HUB_JWT_SECRET: ${HUB_JWT_SECRET:?set HUB_JWT_SECRET in ~/hub/.env (ADR 0009)}
+      HUB_ADMIN_EMAIL: ${HUB_ADMIN_EMAIL:?set HUB_ADMIN_EMAIL in ~/hub/.env (ADR 0009)}
+      HUB_ADMIN_PASSWORD: ${HUB_ADMIN_PASSWORD:?set HUB_ADMIN_PASSWORD in ~/hub/.env (ADR 0009)}
+      # Inside the container, on the named volume; the image creates it owned by the non-root user.
+      HUB_RESUME_STORAGE_PATH: /var/lib/hub/resume
+      # An explicit -Xmx takes precedence over the image's -XX:MaxRAMPercentage=75, leaving about 500M of the 1G limit
+      # for metaspace, threads and code cache.
+      JAVA_TOOL_OPTIONS: -Xmx512m
+    volumes:
+      - resume-data:/var/lib/hub/resume
+    networks:
+      - internal
+    # Healthcheck (liveness) comes from the image.
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+
+  frontend:
+    image: hub-frontend:${HUB_IMAGE_TAG:?set HUB_IMAGE_TAG to the release's commit sha}
+    restart: unless-stopped
+    logging: *logging
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      # Loopback only: Docker's published ports bypass ufw, so binding to all interfaces would expose nginx publicly.
+      - "127.0.0.1:8081:8080"
+    networks:
+      # internal to reach the backend; edge because a container only on an internal network cannot publish a port.
+      - internal
+      - edge
+    # Healthcheck comes from the image.
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+
+networks:
+  # No route out: the database and backend are reachable only from containers on this network. #60 (mail) will give
+  # the backend a way out.
+  internal:
+    internal: true
+  edge: {}
+
+volumes:
+  db-data:
+  resume-data:
